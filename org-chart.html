@@ -1,0 +1,2631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/favicon.png">
+<title>{{SITE_TITLE}}</title>
+<style>
+  /* USAA × Salesforce design system (subset). Fonts + lockup are served,
+     auth-gated, from /documents/supporting-files/. */
+  @font-face {
+    font-family: 'Avant Garde Std';
+    src: url('/documents/supporting-files/ITCAvantGardeStd-Demi.otf') format('opentype');
+    font-weight: 600 700; font-style: normal; font-display: swap;
+  }
+  @font-face { font-family: 'Salesforce Sans'; src: url('/documents/supporting-files/SalesforceSans-Light.ttf') format('truetype'); font-weight: 300; font-display: swap; }
+  @font-face { font-family: 'Salesforce Sans'; src: url('/documents/supporting-files/SalesforceSans-Regular.ttf') format('truetype'); font-weight: 400; font-display: swap; }
+  @font-face { font-family: 'Salesforce Sans'; src: url('/documents/supporting-files/SalesforceSans-Bold.ttf') format('truetype'); font-weight: 700; font-display: swap; }
+
+  :root {
+    --usaa-navy: #0a3865; --usaa-navy-deep: #062a4d;
+    --usaa-royal: #1364c4; --usaa-royal-deep: #0f4f9e;
+    --usaa-yellow: #f8c33d;
+    --usaa-cloud-bg: #cee4f7; --usaa-cloud-bg-soft: #e9f3fc;
+    --sf-electric-50: #066afe; --sf-electric-20: #002775;
+    --fg-1: #14171a; --fg-2: #3a4654; --fg-3: #6b7785; --fg-inverse: #fff;
+    --bg-1: #fff; --bg-2: #f5f8fb; --bg-3: #e9f3fc;
+    --border-1: #d8e3ee; --border-2: #b9cee0;
+    --shadow-1: 0 1px 2px rgba(10,56,101,.06);
+    --shadow-2: 0 4px 16px rgba(10,56,101,.12);
+    --ease-std: cubic-bezier(.4,0,.2,1); --dur-fast: 150ms; --dur-base: 220ms;
+    --font-display: 'Avant Garde Std','Avenir Next',system-ui,sans-serif;
+    --font-body: 'Salesforce Sans','Inter',system-ui,sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    font-family: var(--font-body); color: var(--fg-1); background: var(--bg-2);
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── Top chrome ── */
+  .chrome {
+    background: var(--usaa-navy); color: var(--fg-inverse);
+    padding: 0 28px; height: 64px; display: flex; align-items: center; gap: 18px; flex-shrink: 0;
+  }
+  .chrome .lockup-plate { display: inline-flex; align-items: center; background: #fff; border-radius: 8px; padding: 6px 12px; box-shadow: var(--shadow-1); }
+  .chrome .lockup { height: 30px; width: auto; display: block; }
+  .chrome .titles { display: flex; flex-direction: column; line-height: 1.15; }
+  .chrome .titles .t1 { font-family: var(--font-display); font-weight: 700; font-size: 17px; letter-spacing: -.01em; }
+  .chrome .titles .t2 { font-size: 12px; color: var(--usaa-cloud-bg); margin-top: 2px; }
+  .chrome .spacer { flex: 1; }
+  .chrome .count { font-size: 12px; color: var(--usaa-cloud-bg); }
+  .chrome .home-link { color: var(--usaa-cloud-bg); font-size: 13px; text-decoration: none; opacity: .9; margin-left: 18px; }
+  .chrome .home-link:hover { opacity: 1; text-decoration: underline; }
+  .keyline { height: 6px; background: var(--usaa-yellow); flex-shrink: 0; }
+
+  /* ── Toolbar ── */
+  .toolbar {
+    display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+    padding: 12px 28px; background: var(--bg-1); border-bottom: 1px solid var(--border-1); flex-shrink: 0;
+  }
+  .search {
+    height: 38px; border: 1px solid var(--border-1); border-radius: 2px;
+    padding: 0 12px; font: inherit; font-size: 14px; min-width: 230px; flex: 1; max-width: 340px;
+    background: var(--bg-1); color: var(--fg-1);
+  }
+  .search:focus { outline: 2px solid var(--sf-electric-50); outline-offset: -1px; border-color: var(--sf-electric-50); }
+
+  .ws-filter { position: relative; }
+  .ws-toggle {
+    height: 38px; padding: 0 14px; border: 1px solid var(--border-1); border-radius: 2px;
+    background: var(--bg-1); color: var(--fg-1); font: inherit; font-size: 14px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 8px;
+  }
+  .ws-toggle:hover { border-color: var(--usaa-royal); }
+  .ws-toggle .caret { font-size: 10px; color: var(--fg-3); }
+  .ws-menu {
+    position: absolute; top: 44px; left: 0; z-index: 30; min-width: 280px;
+    background: var(--bg-1); border: 1px solid var(--border-1); border-radius: 4px;
+    box-shadow: var(--shadow-2); padding: 8px; display: none; max-height: 60vh; overflow-y: auto;
+  }
+  .ws-menu.open { display: block; }
+  .ws-item { display: flex; align-items: center; gap: 9px; padding: 7px 8px; border-radius: 3px; cursor: pointer; font-size: 13.5px; }
+  .ws-item:hover { background: var(--bg-2); }
+  .ws-item .sw { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .ws-item input { margin: 0; }
+  .ws-menu .ws-actions { display: flex; gap: 8px; padding: 8px 6px 4px; border-top: 1px solid var(--border-1); margin-top: 6px; }
+  .ws-menu .ws-actions a { font-size: 12px; color: var(--usaa-royal); cursor: pointer; }
+
+  .toolbar .spacer { flex: 1; }
+  .seg { display: inline-flex; border: 1px solid var(--border-1); border-radius: 2px; overflow: hidden; }
+  .seg button { height: 38px; padding: 0 13px; border: 0; background: var(--bg-1); color: var(--fg-2); font: inherit; font-size: 13px; cursor: pointer; border-left: 1px solid var(--border-1); }
+  .seg button:first-child { border-left: 0; }
+  .seg button.active { background: var(--usaa-cloud-bg-soft); color: var(--usaa-navy); font-weight: 700; }
+
+  /* layout-mode segmented control: network · org chart · concentric circles */
+  .mode-seg { display: inline-flex; border: 1px solid var(--border-1); border-radius: 19px; overflow: hidden; background: var(--bg-1); }
+  .mode-seg .mode-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 40px; height: 38px; border: 0; border-left: 1px solid var(--border-1);
+    background: transparent; color: var(--fg-3); cursor: pointer;
+    transition: background var(--dur-base) var(--ease-std), color var(--dur-base) var(--ease-std);
+  }
+  .mode-seg .mode-btn:first-child { border-left: 0; }
+  .mode-seg .mode-btn:hover { color: var(--usaa-navy); background: var(--bg-2); }
+  .mode-seg .mode-btn.active { background: var(--usaa-navy); color: #fff; }
+  .fit-toggle { display: none; align-items: center; gap: 6px; font: inherit; font-size: 13px; color: var(--fg-2); cursor: pointer; white-space: nowrap; }
+  .fit-toggle.show { display: inline-flex; }
+  .fit-toggle input { margin: 0; cursor: pointer; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    height: 38px; padding: 0 16px; border: 0; border-radius: 2px;
+    background: var(--usaa-royal); color: #fff; font: inherit; font-weight: 700; font-size: 14px;
+    cursor: pointer; transition: background var(--dur-base) var(--ease-std), transform var(--dur-fast) var(--ease-std); white-space: nowrap;
+  }
+  .btn:hover { background: var(--usaa-royal-deep); }
+  .btn:active { transform: scale(.97); }
+  .btn--ghost { background: transparent; color: var(--usaa-royal); border: 1px solid var(--usaa-royal); }
+  .btn--ghost:hover { background: rgba(19,100,196,.06); }
+  .btn--danger { background: transparent; color: #a3232b; border: 1px solid #e2b6b8; }
+  .btn--danger:hover { background: #fbeced; }
+
+  /* ── Graph stage ── */
+  .stage { flex: 1; position: relative; overflow: hidden; background:
+      radial-gradient(circle at 50% 40%, #fbfdff 0%, var(--bg-2) 70%); }
+  #graph { width: 100%; height: 100%; display: block; cursor: grab; }
+  #graph.panning { cursor: grabbing; }
+  #graph text { -webkit-user-select: none; user-select: none; pointer-events: none; }
+
+  .edge-report { stroke: var(--usaa-navy); stroke-width: 1.6; fill: none; }
+  /* inferred lines: same navy as confirmed, but dashed + a "?" badge at midpoint */
+  .edge-report.inferred { stroke: var(--usaa-navy); stroke-dasharray: 5 4; }
+  .infer-badge circle { fill: #fff; stroke: var(--usaa-navy); stroke-width: 1; }
+  .infer-badge text { fill: var(--usaa-navy); font: 700 9px var(--font-body); text-anchor: middle; dominant-baseline: central; }
+  .infer-badge.dim { opacity: .07; }
+  .edge-works { stroke: var(--sf-electric-50); stroke-width: 1; stroke-dasharray: 1 3; opacity: .5; fill: none; }
+  .edge.dim { opacity: .07 !important; }
+  .edge-hit { stroke: transparent; stroke-width: 16; fill: none; cursor: pointer; }
+  .orbit-ring { fill: none; stroke: #9fb0c2; stroke-width: 1; opacity: .6; pointer-events: none; }
+  /* While drawing a link, edge hit-paths must not intercept the target hit-test. */
+  #graph.linking .edge-hit { pointer-events: none; }
+  .orphan-toggle { cursor: pointer; }
+  .orphan-toggle text { text-decoration: underline; }
+  .orphan-toggle:hover text { fill: var(--usaa-royal-deep); }
+  .edge.hot { stroke-width: 3; }
+  .edge-works.hot { opacity: 1; }
+
+  /* small floating control buttons (edges + cards), drawn in SVG */
+  .ctl { cursor: pointer; }
+  /* Only the button's BACKGROUND disc (a direct-child circle) is styled here —
+     NOT circles inside the glyph (.gly), which are part of the line drawing and
+     must just invert with the lines when active. */
+  .ctl > circle { fill: #fff; stroke: var(--border-1); stroke-width: 1; }
+  .ctl:hover > circle { stroke: var(--sf-electric-50); fill: var(--usaa-cloud-bg-soft); }
+  .ctl .gly { stroke: var(--usaa-navy); stroke-width: 1.7; fill: none; stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+  /* filled-silhouette glyphs (e.g. add-person): fill the navy shape. Individual
+     elements can override via inline style= (beats this rule) for the badge. */
+  .ctl .gly-fill { fill: var(--usaa-navy); stroke-width: 0; }
+  .ctl.danger:hover > circle { stroke: #c0392b; fill: #fbeced; }
+  .ctl.danger .gly { stroke: #a3232b; }
+  /* active (toggled-on) control, e.g. focus engaged: invert — navy disc, white
+     line glyph (lines AND glyph circles go white together). */
+  .ctl.active > circle { fill: var(--usaa-navy); stroke: var(--usaa-navy); }
+  .ctl.active .gly { stroke: #fff; }
+  .ctl.active:hover > circle { fill: var(--usaa-navy-deep); stroke: var(--usaa-navy-deep); }
+  /* Per-button hover label: hidden until the button is hovered. The halo copy
+     (drawn first, thick white stroke) makes the text legible over edges/cards. */
+  .ctl-label { opacity: 0; transition: opacity .1s ease; pointer-events: none; font: 600 11px Arial, sans-serif; }
+  .ctl:hover .ctl-label, .report-toggle:hover .ctl-label { opacity: 1; }
+  .ctl-label .halo { stroke: #fff; stroke-width: 3.2; fill: none; paint-order: stroke; }
+  .ctl-label .fg { fill: var(--usaa-navy); }
+  .ctl-bg { fill: #fff; opacity: .9; }
+  /* Persistent per-card reports toggle (org modes): hidden until the card is
+     hovered, but pinned visible whenever it's "on" (reports hidden). */
+  .report-toggle { opacity: 0; pointer-events: none; transition: opacity .12s ease; }
+  .report-toggle.show { opacity: 1; pointer-events: auto; }
+  /* Transparent hit-shield that protects the toggle's off-box half from the
+     report-line edge-hit paths running underneath it. */
+  .toggle-shield { fill: #fff; opacity: 0; }
+  .report-toggle.show .toggle-shield { pointer-events: auto; }
+  /* link being drawn — must not intercept the hit-test for the card beneath it,
+     or elementFromPoint returns the draft handle/line instead of the target. */
+  .draft-link { stroke: var(--usaa-navy); stroke-width: 1.8; fill: none; stroke-dasharray: 6 4; pointer-events: none; }
+  .draft-handle { pointer-events: none; }
+  .node-card.drop-ok .bg { stroke: var(--sf-electric-50); stroke-width: 2.5; fill: var(--usaa-cloud-bg-soft); }
+
+  .node-card { cursor: pointer; }
+  .node-card .bg { fill: #fff; stroke: var(--border-1); stroke-width: 1; rx: 4; }
+  .node-card .accent { rx: 2; }
+  .node-card:hover .bg { stroke: var(--sf-electric-50); }
+  .node-card.sel .bg { stroke: var(--sf-electric-50); stroke-width: 2; }
+  .node-card.dim { opacity: .22; }
+  .node-card .nm { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; fill: var(--usaa-navy); }
+  .node-card .ti { font-size: 10.5px; fill: var(--fg-2); }
+  .node-card .contractor-mark { font-size: 9px; fill: var(--fg-3); font-style: italic; }
+  .node-card .aff { fill: #d4862a; }
+  /* square card (radial mode): wrapped name + title */
+  .sqcard { width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 4px 7px; box-sizing: border-box; overflow: hidden; }
+  .sqcard .sq-nm { font-family: var(--font-display); font-weight: 700; font-size: 12px; line-height: 1.15; color: var(--usaa-navy); }
+  .sqcard .sq-ti { font-family: var(--font-body); font-size: 10px; line-height: 1.2; color: var(--fg-2); margin-top: 3px; }
+  /* org card: wrapped, left-aligned, grows downward to fit the full title */
+  .orgcard { width: 100%; height: 100%; display: flex; flex-direction: column; justify-content: center; padding: 3px 10px; box-sizing: border-box; overflow: hidden; }
+  .orgcard .sq-nm { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; line-height: 1.18; color: var(--usaa-navy); }
+  .orgcard .sq-ti { font-family: var(--font-body); font-size: 10.5px; line-height: 1.25; color: var(--fg-2); margin-top: 3px; }
+  /* inline name editor on a card */
+  .name-edit-input {
+    width: 100%; box-sizing: border-box; border: 1px solid var(--sf-electric-50);
+    border-radius: 3px; padding: 1px 4px; margin: 0;
+    font-family: var(--font-display); font-weight: 700; font-size: 12.5px;
+    color: var(--usaa-navy); background: #fff; outline: none;
+  }
+
+  /* Gold flash: a brief two-pulse attention cue fired right after a card's
+     reports-visibility or focus is toggled (it used to be a persistent glow;
+     the persistent "this is toggled" indicator is now the always-visible
+     reports-toggle icon on the card's right edge). */
+  @keyframes gold-pulse {
+    0%, 100% { filter: drop-shadow(0 0 3px rgba(248,195,61,.85)); }
+    50%      { filter: drop-shadow(0 0 8px rgba(248,195,61,1)); }
+  }
+  .node-card.glow-flash { animation: gold-pulse 0.9s ease-in-out 2; }
+
+  /* floating controls */
+  .zoomers { position: absolute; right: 18px; bottom: 18px; display: flex; flex-direction: column; gap: 6px; z-index: 10; }
+  .zoomers button { width: 38px; height: 38px; border: 1px solid var(--border-1); border-radius: 4px; background: var(--bg-1); font-size: 18px; cursor: pointer; color: var(--fg-2); box-shadow: var(--shadow-1); }
+  .zoomers button:hover { background: var(--bg-2); color: var(--usaa-navy); }
+  .hint-chip {
+    position: absolute; left: 18px; bottom: 18px; z-index: 10; font-size: 11.5px; color: var(--fg-3);
+    background: rgba(255,255,255,.82); border: 1px solid var(--border-1); border-radius: 4px; padding: 6px 10px;
+  }
+  .edge-legend { position: absolute; left: 18px; top: 14px; z-index: 10; display: flex; flex-direction: column; gap: 5px;
+    background: rgba(255,255,255,.85); border: 1px solid var(--border-1); border-radius: 4px; padding: 9px 11px; font-size: 11.5px; color: var(--fg-2); }
+  .edge-legend .row { display: flex; align-items: center; gap: 8px; }
+  .edge-legend svg { display: block; }
+
+  /* ── Drawer (shared with edit) ── */
+  .overlay { position: fixed; inset: 0; background: rgba(10,56,101,.32); z-index: 100; opacity: 0; pointer-events: none; transition: opacity var(--dur-base) var(--ease-std); }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .drawer { position: fixed; top: 0; right: 0; bottom: 0; width: 444px; max-width: 92vw; background: var(--bg-1); z-index: 110; transform: translateX(100%); transition: transform var(--dur-base) var(--ease-std); display: flex; flex-direction: column; box-shadow: -8px 0 32px rgba(10,56,101,.18); }
+  .drawer.open { transform: translateX(0); }
+  .drawer-head { background: var(--usaa-navy); color: #fff; padding: 20px 24px 18px; position: relative; }
+  .drawer-head .close { position: absolute; top: 14px; right: 18px; background: none; border: 0; color: #fff; font-size: 26px; line-height: 1; cursor: pointer; opacity: .8; }
+  .drawer-head .close:hover { opacity: 1; }
+  .drawer-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 20px; padding-right: 32px; }
+  .drawer-head .sub { font-size: 13px; color: var(--usaa-cloud-bg); margin-top: 5px; }
+  .drawer-body { flex: 1; overflow-y: auto; padding: 8px 0 24px; }
+
+  .field { padding: 14px 24px 0; }
+  .field label { display: block; font-size: 12px; font-weight: 700; color: var(--fg-2); margin-bottom: 5px; }
+  .field input, .field select, .field textarea { width: 100%; border: 1px solid var(--border-1); border-radius: 2px; padding: 9px 11px; font: inherit; font-size: 14px; background: var(--bg-1); color: var(--fg-1); }
+  .field textarea { resize: vertical; min-height: 84px; line-height: 1.5; }
+  .field input:focus, .field select:focus, .field textarea:focus { outline: 2px solid var(--sf-electric-50); outline-offset: -1px; border-color: var(--sf-electric-50); }
+  .field .hint { font-size: 11.5px; color: var(--fg-3); margin-top: 4px; }
+  .field .checkrow { display: flex; align-items: center; gap: 8px; font-size: 13.5px; color: var(--fg-2); }
+  .field .checkrow input { width: auto; }
+
+  .ws-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 12px; margin-top: 4px; }
+  .ws-checks label { display: flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 400; color: var(--fg-2); cursor: pointer; }
+  .ws-checks label .sw { width: 11px; height: 11px; border-radius: 3px; flex-shrink: 0; }
+  .ws-checks label input { width: auto; }
+
+  .works-picker { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 4px; }
+  .works-chip { display: inline-flex; align-items: center; gap: 6px; background: var(--bg-3); border: 1px solid var(--border-1); border-radius: 14px; padding: 3px 6px 3px 10px; font-size: 12px; }
+  .works-chip button { border: 0; background: none; cursor: pointer; color: var(--fg-3); font-size: 14px; line-height: 1; }
+
+  .drawer-actions { display: flex; gap: 10px; align-items: center; padding: 18px 24px; border-top: 1px solid var(--border-1); background: var(--bg-2); }
+  .drawer-actions .spacer { flex: 1; }
+
+  .read-section { padding: 16px 24px; border-bottom: 1px solid var(--border-1); }
+  .read-section:last-child { border-bottom: 0; }
+  .read-section h3 { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--fg-3); margin-bottom: 9px; }
+  .read-row { display: flex; gap: 10px; font-size: 13.5px; margin-bottom: 7px; }
+  .read-row .k { min-width: 92px; font-weight: 700; color: var(--fg-2); flex-shrink: 0; }
+  .read-row .v { color: var(--fg-1); word-break: break-word; }
+  .read-row .v a { color: var(--usaa-royal); }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 11px; font-weight: 700; color: #fff; margin: 0 4px 4px 0; }
+  .pill.muted { background: var(--fg-3); }
+  .badge { display: inline-block; padding: 2px 9px; border-radius: 2px; font-size: 10.5px; font-weight: 700; }
+  .badge.confirmed { background: #dcf0e4; color: #1c6b3f; }
+  .badge.inferred { background: #fdf0d8; color: #8a5a12; }
+  .badge.unknown { background: #eef1f4; color: var(--fg-3); }
+  .badge.aff { background: #fde7cf; color: #8a4f12; }
+  .badge.contractor { background: #e7ecfa; color: #28408a; }
+  .notes-text { font-size: 13.5px; line-height: 1.6; color: var(--fg-2); white-space: pre-wrap; }
+  .link-pill { color: var(--usaa-royal); cursor: pointer; font-size: 13px; }
+  .link-pill:hover { text-decoration: underline; }
+  .stacked { display: flex; flex-direction: column; gap: 4px; }
+
+  .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--usaa-navy); color: #fff; padding: 12px 20px; border-radius: 4px; font-size: 13.5px; box-shadow: var(--shadow-2); z-index: 200; opacity: 0; pointer-events: none; transition: opacity var(--dur-base), transform var(--dur-base); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.err { background: #a3232b; }
+  .loading { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: var(--fg-3); font-size: 15px; }
+</style>
+</head>
+<body>
+
+<div class="chrome">
+  {{SITE_LOCKUP}}
+  <div class="titles">
+    <span class="t1">{{SITE_TITLE}}</span>
+    <span class="t2">{{SITE_SUBTITLE}}</span>
+  </div>
+  <span class="spacer"></span>
+  <span class="count" id="count"></span>
+  {{HOME_LINK}}
+</div>
+<div class="keyline"></div>
+
+<div class="toolbar">
+  <input class="search" id="search" type="search" placeholder="Search name, title, team…" aria-label="Search">
+  <div class="ws-filter">
+    <button class="ws-toggle" id="ws-toggle">Workstreams: <strong id="ws-summary">All</strong> <span class="caret">▼</span></button>
+    <div class="ws-menu" id="ws-menu"></div>
+  </div>
+  <div class="seg" id="edge-seg" title="Which relationships to draw">
+    <button data-edges="all">All links</button>
+    <button data-edges="reports" class="active">Reporting</button>
+    <button data-edges="works">Works-with</button>
+  </div>
+  <div class="mode-seg" id="mode-seg" role="group" aria-label="Layout mode" title="Switch layout">
+    <button class="mode-btn active" data-mode="org" aria-label="Org chart (horizontal)" title="Org chart (horizontal)">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2.5" y="9.5" width="5.5" height="5" rx="1"/><rect x="16" y="2.5" width="5.5" height="5" rx="1"/><rect x="16" y="9.5" width="5.5" height="5" rx="1"/><rect x="16" y="16.5" width="5.5" height="5" rx="1"/>
+        <path d="M8 12 H12 M12 5 V19 M12 5 H16 M12 12 H16 M12 19 H16"/>
+      </svg>
+    </button>
+    <button class="mode-btn" data-mode="orgv" aria-label="Org chart (vertical)" title="Org chart (vertical)">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="9" y="3" width="6" height="4.2" rx="1"/><rect x="2.5" y="16.8" width="6" height="4.2" rx="1"/><rect x="9" y="16.8" width="6" height="4.2" rx="1"/><rect x="15.5" y="16.8" width="6" height="4.2" rx="1"/>
+        <path d="M12 7.2 V11 M5.5 16.8 V13 H18.5 V16.8 M12 13 V16.8"/>
+      </svg>
+    </button>
+    <button class="mode-btn" data-mode="concentric" aria-label="Concentric circles" title="Concentric circles">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="4"/>
+        <line x1="12" y1="8" x2="12" y2="3.5"/><line x1="12" y1="16" x2="12" y2="20.5"/>
+        <line x1="8" y1="12" x2="3.5" y2="12"/><line x1="16" y1="12" x2="20.5" y2="12"/>
+        <line x1="9.2" y1="9.2" x2="6" y2="6"/><line x1="14.8" y1="9.2" x2="18" y2="6"/>
+        <line x1="9.2" y1="14.8" x2="6" y2="18"/><line x1="14.8" y1="14.8" x2="18" y2="18"/>
+        <circle cx="12" cy="3.5" r="1.4"/><circle cx="12" cy="20.5" r="1.4"/><circle cx="3.5" cy="12" r="1.4"/><circle cx="20.5" cy="12" r="1.4"/>
+        <circle cx="6" cy="6" r="1.4"/><circle cx="18" cy="6" r="1.4"/><circle cx="6" cy="18" r="1.4"/><circle cx="18" cy="18" r="1.4"/>
+      </svg>
+    </button>
+    <button class="mode-btn" data-mode="network" aria-label="Network map" title="Network map">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="2.6"/><circle cx="6" cy="6" r="2.2"/><circle cx="18.5" cy="6.5" r="2.6"/><circle cx="5.5" cy="18.5" r="2.6"/><circle cx="13" cy="19" r="2.2"/><circle cx="19" cy="14" r="1.7"/>
+        <line x1="10.1" y1="10.3" x2="7.6" y2="7.6"/><line x1="13.8" y1="10.2" x2="16.6" y2="8"/><line x1="10.4" y1="13.6" x2="7.2" y2="16.8"/><line x1="12.4" y1="14.5" x2="12.8" y2="16.8"/><line x1="14.1" y1="12.7" x2="17.6" y2="13.7"/>
+      </svg>
+    </button>
+  </div>
+  <label class="fit-toggle" id="fit-toggle-wrap" title="Wrap the chart so every box fits the window at the current zoom">
+    <input type="checkbox" id="fit-window"> <span id="fit-label">Fit to height</span>
+  </label>
+  <span class="spacer"></span>
+  <button class="btn" id="add-btn"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-4px"><circle cx="8.5" cy="6" r="3.7"/><path d="M2 20 v-3.5 a4.5 4.5 0 0 1 4.5 -4.5 h4 a4.5 4.5 0 0 1 1.4 .22"/><circle cx="17" cy="16.5" r="5.5"/><line x1="17" y1="13.8" x2="17" y2="19.2"/><line x1="14.3" y1="16.5" x2="19.7" y2="16.5"/></svg> Add person</button>
+</div>
+
+<div class="stage">
+  <svg id="graph"></svg>
+
+  <div class="edge-legend" id="edge-legend">
+    <div class="row"><svg width="34" height="8"><line x1="0" y1="4" x2="34" y2="4" stroke="#0a3865" stroke-width="1.6"/></svg> Reports to (confirmed)</div>
+    <div class="row"><svg width="34" height="14"><line x1="0" y1="7" x2="34" y2="7" stroke="#0a3865" stroke-width="1.6" stroke-dasharray="5 4"/><circle cx="17" cy="7" r="6" fill="#fff" stroke="#0a3865" stroke-width="1"/><text x="17" y="7" text-anchor="middle" dominant-baseline="central" fill="#0a3865" style="font:700 8px sans-serif">?</text></svg> Reports to (inferred)</div>
+    <div class="row"><svg width="34" height="8"><line x1="0" y1="4" x2="34" y2="4" stroke="#066afe" stroke-width="1" stroke-dasharray="1 3"/></svg> Works with</div>
+  </div>
+
+  <div class="zoomers">
+    <button id="zoom-in" title="Zoom in">+</button>
+    <button id="zoom-out" title="Zoom out">&minus;</button>
+    <button id="zoom-fit" title="Fit to view" style="font-size:13px">Fit</button>
+    <button id="auto-layout" title="Auto-layout (re-tidy the tree)" aria-label="Auto-layout">
+      <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M4 9 a5 5 0 0 1 5 -5 h7"/><path d="M14 1 l3 3 -3 3"/>
+        <path d="M20 15 a5 5 0 0 1 -5 5 h-7"/><path d="M10 23 l-3 -3 3 -3"/>
+      </svg>
+    </button>
+  </div>
+  <div class="hint-chip">Drag a person to reposition · drag the canvas to pan · scroll to zoom · click to open</div>
+  <div class="loading" id="loading">Loading stakeholders…</div>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer" aria-hidden="true">
+  <div class="drawer-head">
+    <button class="close" id="drawer-close" aria-label="Close">&times;</button>
+    <h2 id="drawer-name">—</h2>
+    <div class="sub" id="drawer-sub"></div>
+  </div>
+  <div class="drawer-body" id="drawer-body"></div>
+</aside>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ════════════════════════════ State ════════════════════════════
+let people = [];
+let byId = new Map();
+let workstreams = [];          // [{id,label}]
+let wsLabel = {};              // id -> label
+let activeWs = new Set();      // empty = show all
+let edgeMode = "reports";      // all | reports | works (default: reporting only)
+let current = null;            // open drawer id
+
+const CATS = [
+  { v: "exec", label: "Executive" }, { v: "tech", label: "Technology" },
+  { v: "mktg", label: "Marketing" }, { v: "ops", label: "Operations" },
+  { v: "analytics", label: "Data & Analytics" }, { v: "unplaced", label: "Unplaced" }
+];
+const CAT_LABEL = Object.fromEntries(CATS.map(c => [c.v, c.label]));
+
+// Workstream colors (brand-anchored, 11 distinct hues). Fallback gray for none.
+const WS_COLOR = {
+  martech: "#0a3865", atc: "#1364c4", nba: "#066afe", audience: "#b1429a",
+  datacloud: "#2e8b57", ds: "#d4862a", claims: "#c0504d", agency: "#6b4fa0",
+  aigov: "#00859b", conversant: "#8a6d3b", coe: "#4f83cc"
+};
+const NO_WS = "#9aa7b4";
+const colorFor = (p) => (p.workstreams && p.workstreams.length ? (WS_COLOR[p.workstreams[0]] || NO_WS) : NO_WS);
+
+const $ = (s) => document.querySelector(s);
+const esc = (s) => String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
+const SVGNS = "http://www.w3.org/2000/svg";
+const el = (tag, attrs) => { const e = document.createElementNS(SVGNS, tag); for (const k in (attrs||{})) e.setAttribute(k, attrs[k]); return e; };
+
+// ════════════════════════════ API ════════════════════════════
+async function api(method, url, body) {
+  const opts = { method, headers: {} };
+  if (body !== undefined) { opts.headers["Content-Type"] = "application/json"; opts.body = JSON.stringify(body); }
+  const res = await fetch(url, opts);
+  if (res.status === 401) { location.href = "/login"; throw new Error("auth"); }
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(data.error || ("Request failed (" + res.status + ")"));
+  return data;
+}
+async function load() {
+  const data = await api("GET", "/api/stakeholders");
+  people = data.stakeholders;
+  workstreams = data.workstreams || [];
+  wsLabel = Object.fromEntries(workstreams.map(w => [w.id, w.label]));
+  byId = new Map(people.map(p => [p.id, p]));
+  $("#count").textContent = people.length + " stakeholders";
+  buildWsMenu();
+  initSim();
+}
+
+// ════════════════════════════ Force simulation ════════════════════════════
+// Compact custom sim (no external libs so it loads on any network). Nodes get a
+// hierarchy-biased target Y from reporting depth (managers float above reports);
+// reporting + works-with springs and node repulsion do the rest.
+let nodes = [], reportEdges = [], worksEdges = [];
+let sim = { alpha: 0, running: false };
+let view = { k: 1, x: 0, y: 0 };  // zoom/pan transform
+let gRoot, gEdges, gNodes;        // svg layers
+let orphanBand = null;            // label box for the unknown-reporting grid
+let orbitRings = null;            // concentric mode: ring radii to draw as faint orbits
+// Layout mode: 'org' = fixed L→R org chart (default), 'network' = force-directed,
+// 'radial' = concentric circles.
+let layoutMode = "org";
+let fitWindow = false;            // org modes: wrap rows/columns so all boxes fit the window
+let orphansHidden = false;        // when true, the "reporting line unknown" grid is hidden
+let W = 0, H = 0;
+let _userMovedView = false;       // set when the user pans/zooms this layout pass
+let _viewRestored = false;        // set when a saved localStorage view was applied
+
+function computeDepth() {
+  const depth = new Map();
+  const visit = (id, seen) => {
+    if (depth.has(id)) return depth.get(id);
+    const p = byId.get(id);
+    if (!p || !p.reportsTo || !byId.has(p.reportsTo) || seen.has(id)) { depth.set(id, 0); return 0; }
+    seen.add(id);
+    const d = 1 + visit(p.reportsTo, seen);
+    depth.set(id, d); return d;
+  };
+  for (const p of people) visit(p.id, new Set());
+  return depth;
+}
+
+function initSim() {
+  const svg = $("#graph");
+  svg.innerHTML = "";
+  // New layout pass: forget last pass's "user moved the view" / "restored" state
+  // so the default framing (or a saved view) can take effect cleanly.
+  _userMovedView = false; _viewRestored = false;
+  const rect = svg.getBoundingClientRect();
+  W = rect.width; H = rect.height;
+
+  gRoot = el("g"); svg.appendChild(gRoot);
+  gEdges = el("g"); gRoot.appendChild(gEdges);
+  gNodes = el("g"); gRoot.appendChild(gNodes);
+
+  const depth = computeDepth();
+  const maxDepth = Math.max(1, ...[...depth.values()]);
+
+  // Hidden set: anyone inside a collapsed subtree is excluded from layout+render.
+  const hidden = computeHidden();
+  // Focus mode: also hide everyone outside the focused person's chain of command.
+  const focusSet = computeFocusSet();
+  if (focusSet) for (const p of people) if (!focusSet.has(p.id)) hidden.add(p.id);
+
+  // Layout source. Network mode: tidy-tree SEED for the force sim. Org mode: a
+  // fixed left→right org chart whose positions are used as-is (no physics).
+  // Fixed (non-physics) modes: org chart (either orientation), concentric.
+  const fixedMode = isOrgLike() || layoutMode === "concentric";
+  let seed;
+  if (isOrgLike() && fitWindow) {
+    seed = orgLayoutFit(hidden, isOrgVertical(), fitBudgetPx());
+  } else if (isOrgLike()) {
+    seed = orgLayout(hidden, isOrgVertical());
+  } else if (layoutMode === "concentric") {
+    seed = concentricLayout(hidden);
+  } else {
+    seed = tidyLayout(hidden);
+  }
+
+  // Does any stored position exist? If so we trust the saved arrangement and
+  // DON'T re-run the simulation (so a reload restores exactly what the user left).
+  const anySaved = people.some((p) => p.posX != null && p.posY != null && !hidden.has(p.id));
+
+  // Resolve each visible person's starting position. Priority:
+  //   1. a saved position (user's arrangement / prior settle),
+  //   2. just below its manager's resolved position (so a freshly-added card
+  //      appears next to its boss, not at the tidy layout's canvas-centered slot
+  //      — which, against a saved arrangement, lands far away),
+  //   3. the tidy-tree seed.
+  const visibleP = people.filter((p) => !hidden.has(p.id) && !(orphansHidden && seed.orphans.has(p.id)));
+  const resolved = new Map(); // id -> {x,y}
+  const savedPos = (p) => (p.posX != null && p.posY != null) ? { x: p.posX, y: p.posY } : null;
+  function resolvePos(p, guard) {
+    if (resolved.has(p.id)) return resolved.get(p.id);
+    let pos = savedPos(p);
+    if (!pos && p.reportsTo && byId.has(p.reportsTo) && !hidden.has(p.reportsTo) && (guard || 0) < 50) {
+      const mgr = byId.get(p.reportsTo);
+      const mp = savedPos(mgr) || resolvePos(mgr, (guard || 0) + 1);
+      if (mp) {
+        // Fan new siblings out a little so multiple adds don't stack exactly.
+        const sibs = people.filter((q) => q.reportsTo === p.reportsTo);
+        const idx = Math.max(0, sibs.findIndex((q) => q.id === p.id));
+        const spread = (idx - (sibs.length - 1) / 2) * (NW * 0.5);
+        pos = { x: mp.x + spread, y: mp.y + NH + LEVEL_GAP };
+      }
+    }
+    if (!pos) pos = seed.pos.get(p.id) || { x: W / 2, y: 100 };
+    resolved.set(p.id, pos);
+    return pos;
+  }
+
+  nodes = visibleP.map((p) => {
+      const orphan = seed.orphans.has(p.id);
+      // Fixed modes (org / radial): every card is pinned to its computed slot
+      // (no physics, no saved-position override). Network mode: resolve start
+      // position and pin only orphans.
+      if (fixedMode) {
+        const op = seed.pos.get(p.id) || { x: W / 2, y: 100 };
+        return { id: p.id, p, x: op.x, y: op.y, vx: 0, vy: 0, fx: op.x, fy: op.y, targetY: op.y, depth: depth.get(p.id) || 0, orphan };
+      }
+      const startPos = resolvePos(p);
+      const seedPos = seed.pos.get(p.id) || startPos;
+      // Orphans (no edges) are pinned to their grid slot — physics would only
+      // scatter them. A saved-position orphan stays where the user left it.
+      const pin = orphan ? { fx: startPos.x, fy: startPos.y } : { fx: null, fy: null };
+      return {
+        id: p.id, p,
+        x: startPos.x, y: startPos.y, vx: 0, vy: 0, ...pin,
+        targetY: seedPos.y, depth: depth.get(p.id) || 0, orphan
+      };
+    });
+  const nodeById = new Map(nodes.map(n => [n.id, n]));
+  orphanBand = seed.band;
+  orbitRings = (layoutMode === "concentric" && seed.rings) ? seed.rings : null;
+
+  reportEdges = [];
+  worksEdges = [];
+  const seenWorks = new Set();
+  for (const p of people) {
+    if (!nodeById.has(p.id)) continue; // p was filtered out (collapsed or hidden orphan)
+    if (p.reportsTo && nodeById.has(p.reportsTo)) {
+      reportEdges.push({ s: nodeById.get(p.reportsTo), t: nodeById.get(p.id), conf: p.reportingConfidence || "inferred", srcId: p.reportsTo, dstId: p.id });
+    }
+    for (const w of (p.worksWith || [])) {
+      if (!nodeById.has(w)) continue;
+      const key = [p.id, w].sort().join("|");
+      if (seenWorks.has(key)) continue;
+      seenWorks.add(key);
+      worksEdges.push({ s: nodeById.get(p.id), t: nodeById.get(w), srcId: p.id, dstId: w, works: true });
+    }
+  }
+
+  drawStatic();
+  $("#loading").style.display = "none";
+  if (isOrgLike() && fitWindow) {
+    // Fit-to-window: keep the current zoom (that's the point); just pan so the
+    // wrapped, window-sized layout starts at the top-left of the canvas.
+    positionAll();
+    setTimeout(() => { panToTopLeft(); }, 30);
+  } else if (fixedMode) {
+    // Fixed layout (org / concentric): positions are final, no physics.
+    positionAll();
+    setTimeout(applyInitialView, 60);
+  } else if (anySaved) {
+    // Restore the saved arrangement (no physics), but still run the hard
+    // collision pass so cards that were saved touching — e.g. by an older layout
+    // or after a card grew — ease apart into clean, non-overlapping positions.
+    positionAll();
+    settleCollisions(true);     // separate overlaps, then persist the cleaned layout
+    setTimeout(applyInitialView, 60);
+  } else {
+    reheat(1);
+    setTimeout(applyInitialView, 700);
+  }
+}
+
+// ── Tidy reporting-tree layout (Reingold–Tilford style, top-down) ──
+// Lays each reporting tree out so siblings never overlap and parents center
+// over their children. Returns seed positions for every visible node; people
+// with no manager-in-graph and no reports go into a labeled grid below.
+const COL_GAP = 26, LEVEL_GAP = 96; // gaps added to card size for spacing
+function tidyLayout(hidden) {
+  hidden = hidden || new Set();
+  const visible = people.filter((p) => !hidden.has(p.id));
+  const vis = new Set(visible.map((p) => p.id));
+  const childrenOf = new Map();
+  for (const p of visible) {
+    const mgr = p.reportsTo && vis.has(p.reportsTo) ? p.reportsTo : null;
+    if (mgr) { (childrenOf.get(mgr) || childrenOf.set(mgr, []).get(mgr)).push(p.id); }
+  }
+  // Stable sibling order by name.
+  for (const arr of childrenOf.values()) arr.sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+
+  // Roots = visible people with a manager that is NOT visible (or none) but who
+  // themselves have at least one visible report → they head a tree.
+  const hasMgr = (id) => { const p = byId.get(id); return p.reportsTo && vis.has(p.reportsTo); };
+  const roots = visible
+    .filter((p) => !hasMgr(p.id) && childrenOf.has(p.id))
+    .map((p) => p.id)
+    .sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+
+  const stepX = NW + COL_GAP, stepY = NH + LEVEL_GAP;
+  const pos = new Map();
+  let cursor = 0; // running x-slot for leaf placement
+
+  // First pass: assign an x (in slot units) and depth-based y to each node.
+  function place(id, d) {
+    const kids = childrenOf.get(id) || [];
+    let x;
+    if (!kids.length) { x = cursor; cursor += 1; }
+    else {
+      const xs = kids.map((k) => place(k, d + 1));
+      x = (xs[0] + xs[xs.length - 1]) / 2; // center parent over children
+    }
+    pos.set(id, { slot: x, y: 80 + d * stepY });
+    return x;
+  }
+  for (const r of roots) { place(r, 0); cursor += 1.4; } // gap between trees
+
+  // Convert slot units → pixels, centered on the canvas.
+  const maxSlot = Math.max(1, cursor - 1);
+  const treeW = maxSlot * stepX;
+  const startX = Math.max(W / 2 - treeW / 2, 120);
+  const out = new Map();
+  let treeBottom = 120;
+  for (const [id, q] of pos) {
+    const px = startX + q.slot * stepX, py = q.y;
+    out.set(id, { x: px, y: py });
+    treeBottom = Math.max(treeBottom, py);
+  }
+
+  // Orphans: visible people not placed in any tree (no visible manager AND no
+  // visible reports). Grid them below the forest.
+  const orphans = new Set(visible.filter((p) => !out.has(p.id)).map((p) => p.id));
+  const colW = NW + 34, rowH = NH + 26;
+  const usableW = Math.max(W - 120, colW * 4);
+  const gridCols = Math.max(3, Math.min(orphans.size || 1, Math.floor(usableW / colW)));
+  const gridTopY = treeBottom + stepY * 1.3 + NH * 3; // extra 3 card-heights of gap
+  const gridStartX = W / 2 - ((gridCols - 1) * colW) / 2;
+  [...orphans].sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name)).forEach((id, i) => {
+    const r = Math.floor(i / gridCols), c = i % gridCols;
+    out.set(id, { x: gridStartX + c * colW, y: gridTopY + r * rowH });
+  });
+  const band = orphans.size ? { x: gridStartX - NW / 2, y: gridTopY - NH / 2 - 44, count: orphans.size } : null;
+  return { pos: out, orphans, band };
+}
+
+// Coarse seniority rank parsed from a title, used to line up disconnected
+// sub-tree heads under same-rank peers. Higher number = more senior.
+function rankOf(title) {
+  const t = String(title || "").toLowerCase();
+  if (/\bceo\b|president|chief|^c[a-z]o\b|chair/.test(t)) return 7;
+  if (/\bevp\b|executive vice president/.test(t)) return 6;
+  if (/\bsvp\b|senior vice president/.test(t)) return 5;
+  if (/\bvp\b|vice president|\bavp\b|head of/.test(t)) return 4;
+  if (/director|executive director|\bed\b/.test(t)) return 3;
+  if (/manager|\blead\b|scrum master/.test(t)) return 2;
+  if (/engineer|developer|analyst|architect|administrator|consultant|contractor|owner|specialist|coordinator/.test(t)) return 1;
+  return 0;
+}
+
+// Place the "reporting line unknown" people in a grid BELOW the tree, spanning
+// its width, in both org orientations. Mutates `out` (id → {x,y}) and returns
+// the band box (or null if there are no orphans). `usedRight`/`usedBottom` are
+// the tree's right/bottom extents; the grid starts at startX and below usedBottom.
+function placeOrphanGridBelow(orphans, out, ctx) {
+  if (!orphans.size) return null;
+  const { startX, usedRight, usedBottom } = ctx;
+  const orphanIds = [...orphans].sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+  const ogRowH = Math.max(...orphanIds.map((id) => orgCardH(byId.get(id)))) + 16;
+  const ogColW = NW + 26;
+  const gridY = usedBottom + ORG_ROW_H + 30 + NH * 3; // extra 3 card-heights of gap
+  const cols = Math.max(1, Math.floor((usedRight - startX + ogColW) / ogColW));
+  orphanIds.forEach((id, i) => { const c = i % cols, r = Math.floor(i / cols); out.set(id, { x: startX + c * ogColW, y: gridY + r * ogRowH }); });
+  return { x: startX - NW / 2, y: gridY - NH / 2 - 44, count: orphans.size, width: cols * ogColW };
+}
+
+// ── Fixed org-chart layout (horizontal L→R, or vertical top-down) ──
+// One axis is the reporting DEPTH (levels); the other is the CROSS axis where
+// siblings stack. A tidy first-walk packs each leaf along the cross axis by its
+// own size (so cards never overlap) and centers each parent on its subtree.
+// Horizontal: depth→X (columns), cross→Y. Vertical: depth→Y (rows), cross→X.
+// "Unknowns" go in a grid off the far end. Returns positions + the band box.
+// NW/NH (150/40) are declared later as consts; reference their literals here to
+// avoid a temporal-dead-zone error at module-eval time.
+const ORG_COL_W = 150 + 90, ORG_ROW_H = 40 + 22;
+function orgLayout(hidden, vertical) {
+  hidden = hidden || new Set();
+  const visible = people.filter((p) => !hidden.has(p.id));
+  const vis = new Set(visible.map((p) => p.id));
+  const childrenOf = new Map();
+  for (const p of visible) {
+    const mgr = p.reportsTo && vis.has(p.reportsTo) ? p.reportsTo : null;
+    if (mgr) (childrenOf.get(mgr) || childrenOf.set(mgr, []).get(mgr)).push(p.id);
+  }
+  for (const arr of childrenOf.values()) arr.sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+  const hasMgr = (id) => { const p = byId.get(id); return p.reportsTo && vis.has(p.reportsTo); };
+  const roots = visible.filter((p) => !hasMgr(p.id) && childrenOf.has(p.id)).map((p) => p.id);
+
+  // Cross-axis extent of a card: its height when stacking vertically (siblings
+  // stack in Y), its width when stacking horizontally (siblings stack in X).
+  const crossSize = (id) => vertical ? orgCardW() : orgCardH(byId.get(id));
+  const CROSS_GAP = vertical ? 40 : 22;       // gap between siblings along cross axis
+  const DEPTH_STEP = vertical ? null : ORG_COL_W; // horizontal: fixed column width
+
+  const pos = new Map();   // id -> {col, cross}  (cross in px, center on cross axis)
+  let cursor = 0, maxCol = 0; // cursor = next free cross-axis coordinate (px)
+  // First walk: assign depth (col) and a pixel cross-position; a leaf advances
+  // the cursor by its own cross size; a parent centers on its children's span.
+  function place(id, col) {
+    maxCol = Math.max(maxCol, col);
+    const kids = childrenOf.get(id) || [];
+    let cross;
+    if (!kids.length) {
+      const sz = crossSize(id);
+      cross = cursor + sz / 2;
+      cursor += sz + CROSS_GAP;
+    } else {
+      const cs = kids.map((k) => place(k, col + 1));
+      cross = (cs[0] + cs[cs.length - 1]) / 2;
+    }
+    pos.set(id, { col, cross });
+    return cross;
+  }
+
+  // The biggest tree is the "main chain" and anchors at column 0. Any OTHER
+  // tree whose head is disconnected from it is placed so that head lands in the
+  // column already holding the most people of the same rank (VP, Director, …),
+  // so peers line up vertically. Bigger trees place first to seed the histogram.
+  const descCount = new Map();
+  const countDesc = (id) => { const k = childrenOf.get(id) || []; let s = 1; for (const c of k) s += countDesc(c); descCount.set(id, s); return s; };
+  roots.forEach(countDesc);
+  const sortedRoots = [...roots].sort((a, b) => (descCount.get(b) - descCount.get(a)) || byId.get(a).name.localeCompare(byId.get(b).name));
+  const rankCol = new Map(); // rank -> Map(col -> count of placed people)
+  const tallySubtree = (rootId) => {
+    const stack = [rootId];
+    while (stack.length) {
+      const id = stack.pop();
+      const rk = rankOf(byId.get(id).title), col = pos.get(id).col;
+      if (!rankCol.has(rk)) rankCol.set(rk, new Map());
+      const m = rankCol.get(rk); m.set(col, (m.get(col) || 0) + 1);
+      for (const c of (childrenOf.get(id) || [])) stack.push(c);
+    }
+  };
+  const bestColFor = (rootId) => {
+    const m = rankCol.get(rankOf(byId.get(rootId).title));
+    if (!m || !m.size) return 0;
+    let best = 0, bestN = -1;
+    for (const [col, n] of m) if (n > bestN) { bestN = n; best = col; }
+    return best;
+  };
+  sortedRoots.forEach((r, i) => {
+    const startCol = i === 0 ? 0 : bestColFor(r);
+    place(r, startCol);
+    tallySubtree(r);
+    cursor += ORG_ROW_H; // gap between separate trees
+  });
+
+  const out = new Map();
+  const startX = 120, startY = 80;
+  // Depth-axis offsets. Horizontal: fixed column width. Vertical: each level's
+  // row offset clears the tallest card in the level above (cards grow with text).
+  let depthOffset = [];
+  if (vertical) {
+    const levelH = []; // tallest card height at each depth
+    for (const [id, q] of pos) levelH[q.col] = Math.max(levelH[q.col] || 0, orgCardH(byId.get(id)));
+    const ORG_LEVEL_GAP = 56;
+    depthOffset[0] = 0;
+    for (let d = 1; d < levelH.length; d++) depthOffset[d] = depthOffset[d - 1] + (levelH[d - 1] || NH) / 2 + ORG_LEVEL_GAP + (levelH[d] || NH) / 2;
+  }
+  let usedBottom = startY, usedRight = startX, maxDepthCoord = 0;
+  for (const [id, q] of pos) {
+    const x = vertical ? startX + q.cross : startX + q.col * ORG_COL_W;
+    const y = vertical ? startY + (depthOffset[q.col] || 0) : startY + q.cross;
+    out.set(id, { x, y });
+    usedBottom = Math.max(usedBottom, y);
+    usedRight = Math.max(usedRight, x);
+    maxDepthCoord = Math.max(maxDepthCoord, vertical ? y : x);
+  }
+
+  // Unknowns: everyone not placed in a tree → a grid placed BELOW the tree,
+  // spanning its width (same in both orientations).
+  const orphans = new Set(visible.filter((p) => !out.has(p.id)).map((p) => p.id));
+  const band = placeOrphanGridBelow(orphans, out, { startX, usedRight, usedBottom });
+  return { pos: out, orphans, band };
+}
+
+// ── Fit-to-window org layout ──
+// Same hierarchy, but a node's children are WRAPPED into multiple bands so the
+// whole thing fits a cross-axis budget (the window's height in horizontal mode,
+// width in vertical) at the current zoom. Each subtree is packed into a block
+// (measured first, placed second); when a row/column of children would exceed
+// the budget it wraps to the next depth line, and that extra depth ripples
+// outward naturally because deeper blocks are placed relative to their parent.
+//   depth axis  = the primary flow (X horizontal, Y vertical)
+//   cross axis  = where siblings stack and wrap (Y horizontal, X vertical)
+function orgLayoutFit(hidden, vertical, crossBudgetPx) {
+  hidden = hidden || new Set();
+  const visible = people.filter((p) => !hidden.has(p.id));
+  const vis = new Set(visible.map((p) => p.id));
+  const childrenOf = new Map();
+  for (const p of visible) {
+    const mgr = p.reportsTo && vis.has(p.reportsTo) ? p.reportsTo : null;
+    if (mgr) (childrenOf.get(mgr) || childrenOf.set(mgr, []).get(mgr)).push(p.id);
+  }
+  for (const arr of childrenOf.values()) arr.sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+  const hasMgr = (id) => { const p = byId.get(id); return p.reportsTo && vis.has(p.reportsTo); };
+  const roots = visible.filter((p) => !hasMgr(p.id) && childrenOf.has(p.id)).map((p) => p.id);
+
+  // Per-card extents along each axis.
+  const cardDepth = (id) => vertical ? orgCardH(byId.get(id)) : NW;   // size along depth axis
+  const cardCross = (id) => vertical ? NW : orgCardH(byId.get(id));   // size along cross axis
+  const hasKids = (id) => (childrenOf.get(id) || []).length > 0;
+  const CROSS_GAP = 22;                       // sibling gap on the cross axis
+  const GRID_GAP = vertical ? 46 : 60;        // between wrapped leaf-grid columns
+  // Depth added per hierarchy level: must clear a whole card on the depth axis
+  // (card WIDTH in horizontal mode, the tallest card HEIGHT in vertical) plus a
+  // gap, or a centered parent overlaps its child one level over.
+  const LEVEL_PAD = vertical ? 56 : 80;
+  const maxCardDepth = Math.max(NH, ...visible.map((p) => cardDepth(p.id)));
+  const DEPTH_STEP = maxCardDepth + LEVEL_PAD;
+
+  // Tidy reporting-tree layout (each parent centered over its reports) that also
+  // FITS: a node's children are treated as blocks (a block = the child's whole
+  // subtree) and SHELF-PACKED across the cross axis — when a row of blocks would
+  // exceed the cross budget it wraps to a new depth-band below, trading width for
+  // the free (scrollable) depth axis. Each subtree's own cross is already ≤ budget
+  // (recursive invariant), so the whole tree stays within the window. measure()
+  // computes extents bottom-up; place() assigns absolute coords top-down; a node
+  // is finally centered over the cross span of its direct children.
+  //
+  //   measure(id) → { cross, depthBelow }
+  //     cross      = total cross extent of id's subtree (≤ budget via wrapping)
+  //     depthBelow = distance from id's card CENTER down to the subtree's bottom
+  const SHELF_GAP = LEVEL_PAD;            // depth gap between wrapped child shelves
+  const halfCard = maxCardDepth / 2;
+  const recipe = new Map();
+  function measure(id) {
+    const kids = childrenOf.get(id) || [];
+    if (!kids.length) { recipe.set(id, { kids: [], shelves: [], shelfCenter: [] }); return { cross: cardCross(id), depthBelow: cardDepth(id) / 2 }; }
+    // Each child becomes a block sized to its whole subtree.
+    const blocks = kids.map((k) => { const m = measure(k); return { id: k, cross: Math.max(cardCross(k), m.cross), depthBelow: m.depthBelow }; });
+    // Shelf-pack blocks across the cross axis, wrapping at the budget.
+    const shelves = []; let row = [], rowCross = 0;
+    for (const b of blocks) {
+      const add = (row.length ? CROSS_GAP : 0) + b.cross;
+      if (row.length && rowCross + add > crossBudgetPx) { shelves.push({ items: row, cross: rowCross }); row = []; rowCross = 0; }
+      row.push(b); rowCross += (row.length > 1 ? CROSS_GAP : 0) + b.cross;
+    }
+    if (row.length) shelves.push({ items: row, cross: rowCross });
+    // Depth: shelf 0's card centers sit DEPTH_STEP below id's center; each later
+    // shelf starts below the deepest subtree of the shelf above it.
+    const shelfDepthBelow = shelves.map((s) => Math.max(...s.items.map((b) => b.depthBelow)));
+    const shelfCenter = []; let off = DEPTH_STEP;
+    for (let s = 0; s < shelves.length; s++) { shelfCenter[s] = off; if (s < shelves.length - 1) off += shelfDepthBelow[s] + SHELF_GAP + halfCard; }
+    const childrenCross = Math.max(0, ...shelves.map((s) => s.cross));
+    const cross = Math.max(cardCross(id), childrenCross);
+    const depthBelow = (shelves.length ? shelfCenter[shelves.length - 1] + shelfDepthBelow[shelves.length - 1] : cardDepth(id) / 2);
+    recipe.set(id, { kids, shelves, shelfCenter });
+    return { cross, depthBelow };
+  }
+
+  // Place id's whole subtree. id's card center is at (depthSelf, ?); each child
+  // block is placed in its shelf, then id is centered over its children's span.
+  const pos = new Map(); // id -> {depth, cross} center coords
+  function place(id, depthSelf, crossStart) {
+    const r = recipe.get(id);
+    if (!r || !r.shelves.length) { pos.set(id, { depth: depthSelf, cross: crossStart + cardCross(id) / 2 }); return; }
+    let lo = Infinity, hi = -Infinity;
+    r.shelves.forEach((s, si) => {
+      const d = depthSelf + r.shelfCenter[si];
+      let cc = crossStart;
+      for (const b of s.items) {
+        place(b.id, d, cc);
+        const c = pos.get(b.id).cross;
+        lo = Math.min(lo, c); hi = Math.max(hi, c);
+        cc += b.cross + CROSS_GAP;
+      }
+    });
+    pos.set(id, { depth: depthSelf, cross: (lo + hi) / 2 });
+  }
+
+  // Place a root and return its subtree extent.
+  function placeTree(rootId, depthBase, crossBase) {
+    const cr = measure(rootId);
+    place(rootId, depthBase + cardDepth(rootId) / 2, crossBase);
+    return { depth: cardDepth(rootId) / 2 + cr.depthBelow, cross: Math.max(cardCross(rootId), cr.cross) };
+  }
+
+  // Lay out roots stacked along the cross axis (largest tree first).
+  const descCount = new Map();
+  const countDesc = (id) => { const k = childrenOf.get(id) || []; let s = 1; for (const c of k) s += countDesc(c); descCount.set(id, s); return s; };
+  roots.forEach(countDesc);
+  const sortedRoots = [...roots].sort((a, b) => (descCount.get(b) - descCount.get(a)) || byId.get(a).name.localeCompare(byId.get(b).name));
+  let crossCursor = 0;
+  for (const r of sortedRoots) {
+    const ext = placeTree(r, 0, crossCursor);
+    crossCursor += ext.cross + ORG_ROW_H;
+  }
+
+  // Map (depth, cross) → (x, y) absolute.
+  const out = new Map();
+  const startX = 120, startY = 80;
+  let usedBottom = startY, usedRight = startX;
+  for (const [id, q] of pos) {
+    const x = vertical ? startX + q.cross : startX + q.depth;
+    const y = vertical ? startY + q.depth : startY + q.cross;
+    out.set(id, { x, y });
+    usedBottom = Math.max(usedBottom, y); usedRight = Math.max(usedRight, x);
+  }
+
+  // Unknowns grid: always BELOW the tree, spanning its width (both orientations).
+  const orphans = new Set(visible.filter((p) => !out.has(p.id)).map((p) => p.id));
+  const band = placeOrphanGridBelow(orphans, out, { startX, usedRight, usedBottom });
+  return { pos: out, orphans, band };
+}
+
+// The data can have several disconnected roots (each has reports but no manager
+// in the graph). A radial/concentric chart needs ONE center, so pick the largest
+// tree's head as the center and fold the other roots in as ring-1 members
+// alongside the center's real direct reports — otherwise every root lands on the
+// exact center point and collapses into a pile.
+function pickRadialCenter(roots, childrenOf, leaves) {
+  if (!roots.length) return { center: null, centerKids: [] };
+  const sorted = [...roots].sort((a, b) => (leaves.get(b) - leaves.get(a)) || byId.get(a).name.localeCompare(byId.get(b).name));
+  const center = sorted[0];
+  const others = sorted.slice(1);
+  const realKids = (childrenOf.get(center) || []);
+  // Other roots become ring-1 siblings of the center's directs (by name order).
+  const centerKids = [...realKids, ...others].sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+  return { center, centerKids };
+}
+
+// Spread items (each {ang}) so consecutive ones are ≥ minSep apart on the
+// circle, staying as close as possible to their preferred angles and preserving
+// their (already-sorted) cyclic order. Iterative neighbour push — converges fast
+// for a ring and never reorders, so subtrees stay angularly nested.
+function relaxRingAngles(items, minSep) {
+  const n = items.length;
+  if (n < 2) return;
+  const TWO_PI = Math.PI * 2;
+  if (n * minSep >= TWO_PI) { // ring is full: distribute perfectly evenly
+    const start = items[0].ang;
+    for (let i = 0; i < n; i++) items[i].ang = start + i * (TWO_PI / n);
+    return;
+  }
+  for (let pass = 0; pass < 60; pass++) {
+    let moved = false;
+    for (let i = 0; i < n; i++) {
+      const a = items[i], b = items[(i + 1) % n];
+      let gap = b.ang - a.ang; if (i === n - 1) gap += TWO_PI; // wrap
+      const deficit = minSep - gap;
+      if (deficit > 1e-4) { const sh = deficit / 2; a.ang -= sh; b.ang += sh; moved = true; }
+    }
+    if (!moved) break;
+  }
+}
+
+// ── True concentric-circle layout ──
+// Every node sits STRICTLY on the ring for its reporting depth (CEO at center,
+// directs on ring 1, their directs on ring 2, …), like planets orbiting. Each
+// node's angle comes from its position within the subtree, so a manager's
+// reports cluster in the same sector and sit roughly outward from it; each ring
+// is then relaxed so cards keep a minimum gap without reordering. Unknowns below.
+function concentricLayout(hidden) {
+  hidden = hidden || new Set();
+  const visible = people.filter((p) => !hidden.has(p.id));
+  const vis = new Set(visible.map((p) => p.id));
+  const childrenOf = new Map();
+  for (const p of visible) {
+    const mgr = p.reportsTo && vis.has(p.reportsTo) ? p.reportsTo : null;
+    if (mgr) (childrenOf.get(mgr) || childrenOf.set(mgr, []).get(mgr)).push(p.id);
+  }
+  for (const arr of childrenOf.values()) arr.sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+  const hasMgr = (id) => { const p = byId.get(id); return p.reportsTo && vis.has(p.reportsTo); };
+  const roots = visible.filter((p) => !hasMgr(p.id) && childrenOf.has(p.id)).map((p) => p.id)
+    .sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name));
+
+  const leaves = new Map();
+  function countLeaves(id) {
+    const kids = childrenOf.get(id) || [];
+    if (!kids.length) { leaves.set(id, 1); return 1; }
+    let s = 0; for (const k of kids) s += countLeaves(k);
+    leaves.set(id, s); return s;
+  }
+  roots.forEach(countLeaves);
+
+  // One center (largest tree); other disconnected roots fold into ring 1.
+  const { center, centerKids } = pickRadialCenter(roots, childrenOf, leaves);
+  const kidsOf = (id, list) => (list || childrenOf.get(id) || []);
+
+  // Depth groups (for sizing ring radii) + an angle PER NODE assigned top-down so
+  // every child sits inside its parent's angular wedge → children sit radially
+  // outward from their parent (near-pure radial spokes, the orbital look), and
+  // sibling subtrees never angularly overlap. Wedge width ∝ subtree leaf count.
+  const byDepth = [];
+  const angleOf = new Map();
+  (function depths(id, d, list) {
+    (byDepth[d] || (byDepth[d] = [])).push(id);
+    for (const k of kidsOf(id, list)) depths(k, d + 1);
+  })(center, 0, centerKids);
+  const maxDepth = byDepth.length - 1;
+
+  const GAP_ANG = 24, GAP_RAD = 64; // min arc between cards; clear gap between rings
+  const ringMaxH = byDepth.map((ids) => Math.max(46, ...ids.map((id) => radialCardH(byId.get(id)))));
+  const TWO_PI = Math.PI * 2, START = -Math.PI / 2;
+  const depthOf = new Map();
+  for (let d = 0; d <= maxDepth; d++) for (const id of byDepth[d]) depthOf.set(id, d);
+  const kidsListOf = (id) => (id === center ? centerKids : (childrenOf.get(id) || []));
+
+  // Radial dendrogram. Walk the tree in order; give each LEAF a sequential angle
+  // slot and place every internal node at the MEAN angle of its descendants
+  // (classic tidy-tree). A parent is therefore always centered over its subtree,
+  // so a spoke to any child runs outward through that subtree's own wedge and
+  // never crosses a sibling subtree → no crossings, and children pack tightly
+  // beside each other (no spreading across the ring).
+  const angFrac = new Map();   // node -> angular position in [0,1) of the circle
+  let leafSeq = 0, leafCount = 0;
+  (function countL(id) { const k = kidsListOf(id); if (!k.length) leafCount++; else k.forEach(countL); })(center);
+  leafCount = Math.max(1, leafCount);
+  (function place(id) {
+    const kids = kidsListOf(id);
+    if (!kids.length) { angFrac.set(id, (leafSeq + 0.5) / leafCount); leafSeq++; return angFrac.get(id); }
+    let sum = 0; for (const k of kids) sum += place(k);
+    const f = sum / kids.length; angFrac.set(id, f); return f;
+  })(center);
+
+  // Ring radii: each ring must be big enough that the SMALLEST angular gap
+  // between adjacent nodes on it still spans a card width — that's what prevents
+  // same-ring overlap given the fixed leaf-angle assignment.
+  const ringR = [0];
+  for (let d = 1; d <= maxDepth; d++) {
+    const fr = byDepth[d].map((id) => angFrac.get(id)).sort((a, b) => a - b);
+    let minGap = 1; // fraction of circle
+    for (let i = 1; i < fr.length; i++) minGap = Math.min(minGap, fr[i] - fr[i - 1]);
+    if (fr.length > 1) minGap = Math.min(minGap, 1 - (fr[fr.length - 1] - fr[0])); // wrap
+    if (!isFinite(minGap) || minGap <= 0) minGap = 1;
+    const rAngular = (SQ + GAP_ANG) / (TWO_PI * minGap);
+    ringR[d] = Math.max(rAngular, ringR[d - 1] + (ringMaxH[d - 1] + ringMaxH[d]) / 2 + GAP_RAD);
+  }
+
+  const out = new Map();
+  out.set(center, { x: 0, y: 0 });
+  angleOf.set(center, 0);
+  for (let d = 1; d <= maxDepth; d++) {
+    const r = ringR[d];
+    for (const id of byDepth[d]) {
+      const ang = START + angFrac.get(id) * TWO_PI;
+      angleOf.set(id, ang);
+      out.set(id, { x: Math.cos(ang) * r, y: Math.sin(ang) * r });
+    }
+  }
+
+  let maxY = 0;
+  for (const { y } of out.values()) maxY = Math.max(maxY, y);
+  const orphans = new Set(visible.filter((p) => !out.has(p.id)).map((p) => p.id));
+  let band = null;
+  if (orphans.size) {
+    const ogColW = SQ + 24, ogRowH = SQ + 22;
+    const cols = Math.max(4, Math.ceil(Math.sqrt(orphans.size) * 1.4));
+    const gridW = (cols - 1) * ogColW;
+    const gridX = -gridW / 2, gridY = maxY + SQ + 80;
+    [...orphans].sort((a, b) => byId.get(a).name.localeCompare(byId.get(b).name)).forEach((id, i) => {
+      const c = i % cols, r = Math.floor(i / cols);
+      out.set(id, { x: gridX + c * ogColW, y: gridY + r * ogRowH });
+    });
+    band = { x: gridX - SQ / 2, y: gridY - SQ / 2 - 40, count: orphans.size, width: gridW + SQ };
+  }
+  // Expose ring radii (depths 1..maxDepth) so the renderer can draw faint orbits.
+  return { pos: out, orphans, band, rings: ringR.slice(1) };
+}
+
+// Subtree-collapse: ids whose manager-chain passes through a collapsed node.
+const collapsed = new Set();
+function computeHidden() {
+  const hidden = new Set();
+  if (!collapsed.size) return hidden;
+  const childrenOf = new Map();
+  for (const p of people) if (p.reportsTo && byId.has(p.reportsTo)) (childrenOf.get(p.reportsTo) || childrenOf.set(p.reportsTo, []).get(p.reportsTo)).push(p.id);
+  const hide = (id) => { for (const k of (childrenOf.get(id) || [])) { if (!hidden.has(k)) { hidden.add(k); hide(k); } } };
+  for (const id of collapsed) hide(id);
+  return hidden;
+}
+
+// Focus mode: show ONLY the focused person's chain of command — their ancestors
+// (up the reporting line) and all their descendants (down). Null = no focus.
+let focusId = null;
+function computeFocusSet() {
+  if (!focusId || !byId.has(focusId)) return null;
+  const keep = new Set([focusId]);
+  // up: walk managers
+  let cur = byId.get(focusId).reportsTo, guard = 0;
+  while (cur && byId.has(cur) && guard++ < 999) { keep.add(cur); cur = byId.get(cur).reportsTo; }
+  // down: all descendants
+  const childrenOf = new Map();
+  for (const p of people) if (p.reportsTo && byId.has(p.reportsTo)) (childrenOf.get(p.reportsTo) || childrenOf.set(p.reportsTo, []).get(p.reportsTo)).push(p.id);
+  const addDown = (id) => { for (const k of (childrenOf.get(id) || [])) { if (!keep.has(k)) { keep.add(k); addDown(k); } } };
+  addDown(focusId);
+  return keep;
+}
+function toggleFocus(id) {
+  focusId = (focusId === id) ? null : id;
+  hideCardControls();
+  rebuildGraphSoft();
+  flashCard(id);              // brief twice-pulse cue on the toggled card
+  setTimeout(fitView, 60); // bring the focused chain (or full chart) into view
+}
+
+function reheat(a) {
+  sim.alpha = a != null ? a : 0.6;
+  if (!sim.running) { sim.running = true; requestAnimationFrame(tick); }
+}
+
+function tick() {
+  const a = sim.alpha;
+  // 1) light, medium-range repulsion to pre-spread the field so the hard
+  //    collision pass (step 6) has less work to do. Capped distance AND capped
+  //    force; final non-overlap is GUARANTEED by collision resolution, not here.
+  for (let i = 0; i < nodes.length; i++) {
+    const A = nodes[i];
+    for (let j = i + 1; j < nodes.length; j++) {
+      const B = nodes[j];
+      let dx = A.x - B.x, dy = A.y - B.y;
+      let d2 = dx * dx + dy * dy || 1;
+      if (d2 > 90000) continue; // ignore pairs >300px apart
+      let f = Math.min((9000 / d2) * a, 6); // clamp the kick
+      const d = Math.sqrt(d2);
+      const ux = dx / d, uy = dy / d;
+      A.vx += ux * f; A.vy += uy * f;
+      B.vx -= ux * f; B.vy -= uy * f;
+    }
+  }
+  // 2) reporting springs (strong, target 150) + hierarchy: child below parent
+  for (const e of reportEdges) springTo(e.s, e.t, 150, 0.08 * a);
+  // 3) works-with springs (weaker, longer)
+  for (const e of worksEdges) springTo(e.s, e.t, 210, 0.03 * a);
+  // 4) vertical hierarchy pull + gentle horizontal gravity. Keep X gravity weak
+  //    so it doesn't crush siblings together faster than collision can separate
+  //    them (orphans are pinned in a grid, so they no longer need strong gravity
+  //    to stay contained).
+  for (const n of nodes) {
+    n.vy += (n.targetY - n.y) * 0.06 * a;
+    n.vx += (W / 2 - n.x) * 0.006 * a;
+  }
+  // 5) integrate, with a hard per-tick velocity clamp for stability
+  const VMAX = 18;
+  for (const n of nodes) {
+    if (n.fx != null) { n.x = n.fx; n.vx = 0; }
+    else { n.vx *= 0.86; n.vx = Math.max(-VMAX, Math.min(VMAX, n.vx)); n.x += n.vx; }
+    if (n.fy != null) { n.y = n.fy; n.vy = 0; }
+    else { n.vy *= 0.86; n.vy = Math.max(-VMAX, Math.min(VMAX, n.vy)); n.y += n.vy; }
+  }
+  // 6) hard collision resolution — guarantees cards never touch. This is a
+  //    POSITIONAL pass (not a force) and is NOT scaled by alpha, so it still
+  //    fully separates overlaps after the springs have cooled.
+  resolveCollisions();
+  positionAll();
+  sim.alpha *= 0.985; // ~320 ticks (~5s) to cool, then the terminal phase cleans up
+  if (sim.alpha > 0.01) requestAnimationFrame(tick);
+  else { sim.running = false; settleCollisions(true); } // springs off → separate, then persist
+}
+
+// Terminal phase: once the springs have cooled, relax ONLY the collision
+// constraint (no spring pull fighting back) until every overlap is gone. This
+// is what guarantees the resting frame has zero touching cards. Runs over a few
+// animation frames so a dense cluster eases apart rather than popping.
+function settleCollisions(thenSave) {
+  let frames = 0;
+  const step = () => {
+    const moved = resolveCollisions();
+    positionAll();
+    frames++;
+    if (moved && frames < 240) requestAnimationFrame(step);
+    else {
+      if (thenSave) saveAllPositions();
+      // Nodes are final now — frame the default view (unless the user already
+      // panned/zoomed this layout pass, or we restored a saved view).
+      if (!_userMovedView && !_viewRestored) { defaultView(); saveView(); }
+    }
+  };
+  step();
+}
+
+// ── Position persistence ──
+// Save every (non-orphan-default) node's resting position so a reload restores
+// the arrangement. Orphans keep their grid slot too once saved, so they don't
+// jump if the roster later changes. Best-effort; failures are non-fatal.
+let saveTimer = null;
+function saveAllPositions() {
+  const payload = nodes.map((n) => ({ id: n.id, posX: Math.round(n.x), posY: Math.round(n.y) }));
+  api("PUT", "/api/stakeholders/positions", { positions: payload })
+    .then(() => { for (const n of nodes) { const p = byId.get(n.id); if (p) { p.posX = Math.round(n.x); p.posY = Math.round(n.y); } } })
+    .catch(() => {});
+}
+function savePosition(n) {
+  const p = byId.get(n.id);
+  if (p) { p.posX = Math.round(n.x); p.posY = Math.round(n.y); }
+  api("PUT", "/api/stakeholders/" + encodeURIComponent(n.id) + "/position",
+      { posX: Math.round(n.x), posY: Math.round(n.y) }).catch(() => {});
+}
+function saveSoon() { clearTimeout(saveTimer); saveTimer = setTimeout(saveAllPositions, 900); }
+
+// Separate every pair of cards whose rectangles (plus a margin) overlap, by
+// pushing them apart along the axis of least penetration. Pinned nodes (being
+// dragged or dropped) don't move; the other card absorbs the full push. A few
+// iterations per tick converge a dense cluster into clean, non-touching rows.
+const COLLIDE_PADX = 22, COLLIDE_PADY = 26; // min gap between card edges
+function resolveCollisions() {
+  const minX = NW + COLLIDE_PADX, minY = NH + COLLIDE_PADY;
+  let lastMoved = false;
+  for (let iter = 0; iter < 12; iter++) {
+    let moved = false;
+    for (let i = 0; i < nodes.length; i++) {
+      const A = nodes[i];
+      for (let j = i + 1; j < nodes.length; j++) {
+        const B = nodes[j];
+        const dx = B.x - A.x, dy = B.y - A.y;
+        const ox = minX - Math.abs(dx);   // x-overlap (>0 means overlapping in x)
+        const oy = minY - Math.abs(dy);   // y-overlap
+        if (ox <= 0 || oy <= 0) continue; // boxes clear on at least one axis
+        moved = true;
+        const aMovX = A.fx == null, bMovX = B.fx == null;
+        const aMovY = A.fy == null, bMovY = B.fy == null;
+        // One node pinned, the other free (e.g. a connected card drifting into
+        // the pinned orphan grid): push the free node out HORIZONTALLY so it
+        // clears the whole grid column instead of getting trapped bouncing
+        // between two stacked grid rows on the vertical axis.
+        const onePinned = (aMovX !== bMovX);
+        if (onePinned) {
+          const s = dx === 0 ? (i & 1 ? 1 : -1) : Math.sign(dx);
+          if (bMovX) B.x += ox * s; else if (aMovX) A.x -= ox * s;
+          continue;
+        }
+        if (ox < oy) {                    // least penetration on X → push horizontally
+          const s = dx === 0 ? (i & 1 ? 1 : -1) : Math.sign(dx);
+          if (aMovX && bMovX) { A.x -= (ox / 2) * s; B.x += (ox / 2) * s; }
+          else if (bMovX) B.x += ox * s;
+          else if (aMovX) A.x -= ox * s;
+        } else {                          // push vertically
+          const s = dy === 0 ? (i & 1 ? 1 : -1) : Math.sign(dy);
+          if (aMovY && bMovY) { A.y -= (oy / 2) * s; B.y += (oy / 2) * s; }
+          else if (bMovY) B.y += oy * s;
+          else if (aMovY) A.y -= oy * s;
+        }
+      }
+    }
+    lastMoved = moved;
+    if (!moved) break;
+  }
+  return lastMoved;
+}
+function springTo(a, b, dist, k) {
+  let dx = b.x - a.x, dy = b.y - a.y;
+  const d = Math.sqrt(dx * dx + dy * dy) || 1;
+  const diff = (d - dist) * k;
+  const ux = dx / d, uy = dy / d;
+  a.vx += ux * diff; a.vy += uy * diff;
+  b.vx -= ux * diff; b.vy -= uy * diff;
+}
+
+// ════════════════════════════ Rendering ════════════════════════════
+const NW = 150, NH = 40;   // rectangular card (network + org modes)
+const SQ = 104;            // narrow card WIDTH in concentric mode (height varies)
+// Concentric mode uses the narrow, content-height card + radial edges.
+function isRadialLike() { return layoutMode === "concentric"; }
+// Org chart, either orientation: horizontal ("org", left→right) or vertical
+// ("orgv", top-down). Both share card sizing, edges, and the layout algorithm.
+function isOrgLike() { return layoutMode === "org" || layoutMode === "orgv"; }
+function isOrgVertical() { return layoutMode === "orgv"; }
+// Fit-to-window cross-axis budget: the window extent across which siblings wrap —
+// height in horizontal mode, width in vertical — minus chrome, at the current
+// zoom. Recomputed on every layout so resizing the window re-wraps live.
+function fitBudgetPx() {
+  const pad = 120;
+  const crossPx = isOrgVertical() ? W : H;
+  return Math.max(NW * 1.5, (crossPx - pad) / (view.k || 1));
+}
+// Org and concentric cards wrap their text to as many lines as needed; network
+// keeps the fixed single-line rectangle.
+function wrapsText() { return layoutMode === "concentric" || isOrgLike(); }
+// Current card width depends on the layout mode.
+function cardW() { return isRadialLike() ? SQ : NW; }
+function orgCardW() { return NW; } // org cards are fixed-width (text wraps to fit height)
+// Card height: concentric shrinks/grows to fit the wrapped name + title in a
+// narrow card; org grows downward to fit the full title at full width; network
+// stays the fixed rectangle.
+function cardH(p) {
+  if (layoutMode === "concentric") return radialCardH(p);
+  if (isOrgLike()) return orgCardH(p);
+  return NH;
+}
+
+// Height of an org card sized to fit its full (wrapped) name + title at width NW.
+const _orgHCache = new Map();
+function orgCardH(p) {
+  if (!p) return NH;
+  const key = p.id + "|" + (p.name || "") + "|" + (p.title || "") + "|" + (p.contractor ? "c" : "");
+  if (_orgHCache.has(key)) return _orgHCache.get(key);
+  const innerW = NW - 20;                  // 10px padding each side
+  const wrap = (text, px) => {
+    const perLine = Math.max(1, Math.floor(innerW / (px * 0.55)));
+    let lines = 0;
+    for (const word of String(text || "").trim().split(/\s+/).filter(Boolean)) lines += Math.max(1, Math.ceil(word.length / perLine));
+    const byLen = Math.ceil(String(text || "").length / perLine);
+    return Math.max(1, Math.min(lines, byLen) || byLen);
+  };
+  const nameLines = Math.min(2, wrap(p.name, 12.5));
+  const titleText = p.title || (p.contractor ? "Contractor" : "");
+  const titleLines = titleText ? wrap(titleText, 10.5) : 0;
+  const h = 4 /*accent*/ + 7 /*pad top*/ + nameLines * 16 + (titleLines ? 3 + titleLines * 14 : 0) + 8 /*pad bottom*/;
+  const val = Math.max(NH, Math.round(h));
+  _orgHCache.set(key, val);
+  return val;
+}
+
+// Estimate a radial card's height from how many lines its name and title wrap
+// to at SQ width. Cached per person+title so repeated calls are cheap.
+const _radialHCache = new Map();
+function radialCardH(p) {
+  if (!p) return SQ;
+  const key = p.id + "|" + (p.name || "") + "|" + (p.title || "") + "|" + (p.contractor ? "c" : "");
+  if (_radialHCache.has(key)) return _radialHCache.get(key);
+  const innerW = SQ - 14;                 // padding (7px each side)
+  const wrap = (text, px) => {            // estimate line count at avg char width
+    const charW = px * 0.52, perLine = Math.max(1, Math.floor(innerW / charW));
+    let lines = 0;
+    for (const word of String(text || "").trim().split(/\s+/).filter(Boolean)) {
+      // long words count as their own (possibly multiple) lines
+      lines += Math.max(1, Math.ceil((word.length) / perLine));
+    }
+    // re-estimate by total length too; take the larger
+    const byLen = Math.ceil(String(text || "").length / perLine);
+    return Math.max(1, Math.min(lines, byLen) || byLen);
+  };
+  const nameLines = Math.min(3, wrap(p.name, 12));
+  const titleText = p.title || (p.contractor ? "Contractor" : "");
+  const titleLines = titleText ? Math.min(3, wrap(titleText, 10)) : 0;
+  const h = 4 /*accent*/ + 8 /*pad*/ + nameLines * 15 + (titleLines ? 3 + titleLines * 13 : 0) + 8;
+  const val = Math.max(46, Math.round(h));
+  _radialHCache.set(key, val);
+  return val;
+}
+let gOverlay;             // layer for hover controls / link-draw (above nodes)
+let gToggles;             // layer for the persistent per-card reports toggles
+function drawStatic() {
+  gEdges.innerHTML = ""; gNodes.innerHTML = "";
+  if (!gToggles) { gToggles = el("g"); gRoot.appendChild(gToggles); } else { gToggles.innerHTML = ""; gRoot.appendChild(gToggles); }
+  if (!gOverlay) { gOverlay = el("g"); gRoot.appendChild(gOverlay); } else { gOverlay.innerHTML = ""; gRoot.appendChild(gOverlay); }
+
+  // Concentric mode: faint orbit circles, one per ring, behind everything.
+  if (orbitRings) {
+    for (const r of orbitRings) {
+      gEdges.appendChild(el("circle", { class: "orbit-ring", cx: 0, cy: 0, r }));
+    }
+  }
+
+  for (const e of reportEdges) {
+    // A wide invisible hit-path under each edge makes hover/controls easy to grab.
+    const hit = el("path", { class: "edge-hit" });
+    const line = el("path", { class: "edge edge-report" + (e.conf === "inferred" ? " inferred" : "") });
+    e.elm = line; e.hit = hit;
+    gEdges.appendChild(hit); gEdges.appendChild(line);
+    // Inferred lines carry a small "?" badge at their midpoint.
+    if (e.conf === "inferred") {
+      const badge = el("g", { class: "infer-badge" });
+      badge.appendChild(el("circle", { r: 7 }));
+      const q = el("text"); q.textContent = "?"; badge.appendChild(q);
+      e.badge = badge; gEdges.appendChild(badge);
+    } else { e.badge = null; }
+    bindEdgeHover(e);
+  }
+  for (const e of worksEdges) {
+    const hit = el("path", { class: "edge-hit" });
+    const line = el("path", { class: "edge edge-works" });
+    e.elm = line; e.hit = hit;
+    gEdges.appendChild(hit); gEdges.appendChild(line);
+    bindEdgeHover(e);
+  }
+
+  // Section label above the "reporting line unknown" grid, with a show/hide toggle.
+  if (orphanBand) {
+    const labelText = "REPORTING LINE UNKNOWN · " + orphanBand.count;
+    const lbl = el("text", { x: orphanBand.x, y: orphanBand.y, "font-family": "var(--font-body)", "font-size": "14", "font-weight": "700", fill: "#6b7785", "letter-spacing": "1.2" });
+    lbl.textContent = labelText;
+    gEdges.appendChild(lbl);
+    if (!orphansHidden) {
+      const ruleW = orphanBand.width || 560;
+      const rule = el("line", { x1: orphanBand.x, y1: orphanBand.y + 12, x2: orphanBand.x + ruleW, y2: orphanBand.y + 12, stroke: "#d8e3ee", "stroke-width": "1" });
+      gEdges.appendChild(rule);
+    }
+    // Toggle, just right of the label. Drawn in the TOP overlay layer (so no
+    // card/edge sits over it) with a transparent hit rect for a comfortable
+    // click target. Width is measured after insertion so it sits flush against
+    // the (variable-length) label.
+    const toggle = el("g", { class: "orphan-toggle" });
+    const tgX = orphanBand.x + (lbl.getComputedTextLength ? lbl.getComputedTextLength() : labelText.length * 8.2) + 16;
+    toggle.setAttribute("transform", `translate(${tgX},${orphanBand.y})`);
+    const hit = el("rect", { x: -6, y: -14, width: 52, height: 22, fill: "transparent" });
+    const tt = el("text", { x: 0, y: 0, "font-family": "var(--font-body)", "font-size": "13", "font-weight": "700", fill: "#1364c4" });
+    tt.textContent = orphansHidden ? "Show" : "Hide";
+    toggle.appendChild(hit); toggle.appendChild(tt);
+    toggle.addEventListener("click", (ev) => { ev.stopPropagation(); orphansHidden = !orphansHidden; (layoutMode === "network") ? rebuildGraphSoft() : initSim(); });
+    toggle.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+    gOverlay.appendChild(toggle);
+  }
+
+    const wraps = wrapsText();             // org + concentric wrap text to fit
+    const square = isRadialLike();          // concentric = narrow square-ish card
+  for (const n of nodes) {
+    // Per-card dimensions. Org cards grow downward to fit the full title;
+    // concentric cards vary too; network is the fixed rectangle. Stored on the
+    // node so edge geometry and controls read the same box.
+    const w = n.w = square ? SQ : NW;
+    const h = n.h = cardH(n.p);
+    const g = el("g", { class: "node-card" + (square ? " square" : "") + (wraps && !square ? " org" : ""), "data-id": n.id });
+    const bg = el("rect", { class: "bg", x: -w/2, y: -h/2 + 4, width: w, height: h - 4 });
+    g.appendChild(bg);
+    // Accent: split the top bar into equal segments, one per workstream.
+    const ws = (n.p.workstreams || []);
+    const segs = ws.length ? ws : [null];
+    const segW = w / segs.length;
+    segs.forEach((wk, i) => {
+      const seg = el("rect", { class: "accent", x: -w/2 + i * segW, y: -h/2, width: segW + 0.5, height: 4, fill: wk ? (WS_COLOR[wk] || NO_WS) : NO_WS });
+      g.appendChild(seg);
+    });
+    if (wraps) {
+      // Wrapped name + title via an HTML foreignObject sized to the card. Square
+      // (concentric) cards center their text; org cards are left-aligned.
+      const fo = el("foreignObject", { x: -w/2, y: -h/2 + 4, width: w, height: h - 4 });
+      const div = document.createElement("div");
+      div.className = square ? "sqcard" : "orgcard";
+      div.innerHTML = `<div class="sq-nm">${esc(n.p.name)}</div>` + (n.p.title || n.p.contractor ? `<div class="sq-ti">${esc(n.p.title || "Contractor")}</div>` : "");
+      fo.appendChild(div); g.appendChild(fo);
+    } else {
+      const nm = el("text", { class: "nm", x: -w/2 + 10, y: -h/2 + 19 });
+      nm.textContent = trim(n.p.name, 20);
+      const ti = el("text", { class: "ti", x: -w/2 + 10, y: -h/2 + 32 });
+      ti.textContent = trim(n.p.title || (n.p.contractor ? "Contractor" : "—"), 24);
+      g.appendChild(nm); g.appendChild(ti);
+    }
+    if (n.p.affiliationUncertain) {
+      const aff = el("text", { class: "aff", x: w/2 - 14, y: -h/2 + 19, "font-size": "12", "font-weight": "700" });
+      aff.textContent = "?"; g.appendChild(aff);
+    }
+    n.elm = g; gNodes.appendChild(g);
+    bindNodeDrag(g, n);
+    bindCardHover(g, n);
+  }
+  buildReportToggles();
+  positionAll();
+  applyFilter();
+}
+
+// ── Persistent per-card reports toggle (org modes only) ──
+// A small org-tree button pinned to the MIDPOINT of each card's right edge, for
+// any card that has reports. Hidden until the card is hovered, but kept visible
+// whenever it's "on" (the subtree is collapsed/hidden). Clicking toggles the
+// subtree's visibility (and flashes the card). The glyph is rotated +90° in the
+// horizontal org chart so it points the way the chart flows.
+let reportToggles = []; // { id, g }
+function buildReportToggles() {
+  reportToggles = [];
+  if (!gToggles) return;
+  gToggles.innerHTML = "";
+  if (!isOrgLike()) return;
+  for (const n of nodes) {
+    if (n.orphan || !hasReports(n.id)) continue;
+    const on = collapsed.has(n.id); // "on" = reports hidden
+    const btn = ctlButton(0, 0, GLY.reports, {
+      title: on ? "Show reports" : "Hide reports",
+      active: on,
+      rotate: isOrgVertical() ? 180 : 90,
+      labelRight: true,
+      onClick: () => toggleCollapse(n.id)
+    });
+    btn.classList.add("report-toggle");
+    // Hit-shield: a transparent disc UNDER the glyph, slightly larger than the
+    // button, that captures pointer events so the report-line edge-hit paths
+    // running beneath the toggle's off-box half can't steal the hover/click.
+    // Inserted as the first child so it sits behind the visible circle+glyph.
+    const shield = el("circle", { class: "toggle-shield", r: 14 });
+    btn.insertBefore(shield, btn.firstChild);
+    // Keep hovering the toggle from hiding the card's hover controls, and let it
+    // reveal itself on hover even when the card isn't hovered.
+    const reveal = () => { btn.classList.add("show"); clearTimeout(hoverHideTimer); };
+    btn.addEventListener("pointerenter", reveal);
+    btn.addEventListener("pointermove", reveal);
+    btn.addEventListener("pointerleave", () => { if (!collapsed.has(n.id) && hoverCardId !== n.id) btn.classList.remove("show"); });
+    gToggles.appendChild(btn);
+    reportToggles.push({ id: n.id, g: btn });
+  }
+  syncReportToggleVisibility();
+}
+// Center each toggle ON the card's right edge (half on the box, half off), at
+// the vertical midpoint — same spot in both orientations; only glyph rotation
+// differs.
+function positionReportToggles() {
+  for (const t of reportToggles) {
+    const n = nodes.find((x) => x.id === t.id);
+    if (!n) continue;
+    t.g.setAttribute("transform", `translate(${n.x + halfW(n)},${n.y})`);
+  }
+}
+// Show a toggle when its card is hovered OR its subtree is collapsed (on).
+function syncReportToggleVisibility() {
+  for (const t of reportToggles) {
+    const on = collapsed.has(t.id);
+    t.g.classList.toggle("active", on);
+    const label = on ? "Show reports" : "Hide reports";
+    const ttl = t.g.querySelector("title"); if (ttl) ttl.textContent = label;
+    if (t.g._label) t.g._label.querySelectorAll("text").forEach((tx) => { tx.textContent = label; });
+    t.g.classList.toggle("show", on || hoverCardId === t.id);
+  }
+}
+function trim(s, n) { s = String(s || ""); return s.length > n ? s.slice(0, n - 1) + "…" : s; }
+
+function positionAll() {
+  for (const n of nodes) if (n.elm) n.elm.setAttribute("transform", `translate(${n.x},${n.y})`);
+  for (const e of reportEdges) {
+    const d = edgePath(e.s, e.t, false); if (e.elm) e.elm.setAttribute("d", d); if (e.hit) e.hit.setAttribute("d", d);
+    if (e.badge) { const m = edgeMidpoint(e.s, e.t, false); e.badge.setAttribute("transform", `translate(${m.x},${m.y})`); }
+  }
+  for (const e of worksEdges) { const d = edgePath(e.s, e.t, true); if (e.elm) e.elm.setAttribute("d", d); if (e.hit) e.hit.setAttribute("d", d); }
+  positionReportToggles();
+  if (hoverCardId) positionCardControls();
+  if (hoverEdge) positionEdgeControls();
+  applyTransform();
+}
+// Per-node half-dimensions (fall back to mode defaults before a node is drawn).
+function halfW(n) { return (n.w || cardW()) / 2; }
+function halfH(n) { return (n.h || (isRadialLike() ? radialCardH(n.p) : NH)) / 2; }
+function edgePath(s, t, works) {
+  if (isRadialLike()) {
+    // Reporting: straight line from manager center to report center, trimmed to
+    // each card's edge. Works-with: a curve bowed toward the center of the rings.
+    const a = trimToBox(s, t), b = trimToBox(t, s);
+    if (works) {
+      const mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+      const k = 0.32; // pull the control point inward toward center
+      return `M${a.x},${a.y} Q${mx * (1 - k)},${my * (1 - k)} ${b.x},${b.y}`;
+    }
+    return `M${a.x},${a.y} L${b.x},${b.y}`;
+  }
+  const sHW = halfW(s), tHW = halfW(t), sHH = halfH(s), tHH = halfH(t);
+  if (layoutMode === "orgv") {
+    // Vertical org: parent BOTTOM edge → child TOP edge, elbow-style vertical curve.
+    if (works) {
+      const x1 = s.x, y1 = s.y + sHH, x2 = t.x, y2 = t.y + tHH;
+      const bow = 40 + Math.abs(x2 - x1) * 0.18;
+      const cy = Math.max(y1, y2) + bow;
+      return `M${x1},${y1} C${x1},${cy} ${x2},${cy} ${x2},${y2}`;
+    }
+    const x1 = s.x, y1 = s.y + sHH, x2 = t.x, y2 = t.y - tHH;
+    const my = (y1 + y2) / 2;
+    return `M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`;
+  }
+  if (layoutMode === "org") {
+    if (works) {
+      const x1 = s.x + sHW, y1 = s.y, x2 = t.x + tHW, y2 = t.y;
+      const bow = 40 + Math.abs(y2 - y1) * 0.18;
+      const cx = Math.max(x1, x2) + bow;
+      return `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`;
+    }
+    const x1 = s.x + sHW, y1 = s.y, x2 = t.x - tHW, y2 = t.y;
+    const mx = (x1 + x2) / 2;
+    return `M${x1},${y1} C${mx},${y1} ${mx},${y2} ${x2},${y2}`;
+  }
+  // network mode: gentle vertical curve between card top/bottom edges
+  const x1 = s.x, y1 = s.y + sHH, x2 = t.x, y2 = t.y - tHH;
+  const my = (y1 + y2) / 2;
+  return `M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`;
+}
+// Point on the edge of node A's box, along the direction toward node B.
+function trimToBox(a, b) {
+  const hw = halfW(a), hh = halfH(a);
+  const dx = b.x - a.x, dy = b.y - a.y;
+  if (dx === 0 && dy === 0) return { x: a.x, y: a.y };
+  const sx = dx === 0 ? Infinity : hw / Math.abs(dx);
+  const sy = dy === 0 ? Infinity : hh / Math.abs(dy);
+  const s = Math.min(sx, sy);
+  return { x: a.x + dx * s, y: a.y + dy * s };
+}
+function edgeMidpoint(s, t, works) {
+  if (isRadialLike()) {
+    const a = trimToBox(s, t), b = trimToBox(t, s);
+    let mx = (a.x + b.x) / 2, my = (a.y + b.y) / 2;
+    if (works) { mx *= 0.84; my *= 0.84; } // sits on the inward-bowed curve
+    return { x: mx, y: my };
+  }
+  const sHW = halfW(s), tHW = halfW(t), sHH = halfH(s), tHH = halfH(t);
+  if (layoutMode === "orgv") {
+    if (works) {
+      const y1 = s.y + sHH, y2 = t.y + tHH, bow = 40 + Math.abs(t.x - s.x) * 0.18;
+      return { x: (s.x + t.x) / 2, y: Math.max(y1, y2) + bow * 0.75 };
+    }
+    return { x: (s.x + t.x) / 2, y: ((s.y + sHH) + (t.y - tHH)) / 2 };
+  }
+  if (layoutMode === "org") {
+    if (works) {
+      const x1 = s.x + sHW, x2 = t.x + tHW, bow = 40 + Math.abs(t.y - s.y) * 0.18;
+      return { x: Math.max(x1, x2) + bow * 0.75, y: (s.y + t.y) / 2 };
+    }
+    return { x: ((s.x + sHW) + (t.x - tHW)) / 2, y: (s.y + t.y) / 2 };
+  }
+  const x1 = s.x, y1 = s.y + sHH, x2 = t.x, y2 = t.y - tHH;
+  return { x: (x1 + x2) / 2, y: (y1 + y2) / 2 };
+}
+
+// ════════════════════════════ Filter + search ════════════════════════════
+function matchesWs(p) { if (!activeWs.size) return true; return (p.workstreams || []).some(w => activeWs.has(w)); }
+function matchesSearch(p, q) { if (!q) return true; return [p.name, p.title, p.dept, p.notes, (p.workstreams||[]).map(w=>wsLabel[w]).join(" ")].join(" ").toLowerCase().includes(q); }
+
+function applyFilter() {
+  const q = $("#search").value.trim().toLowerCase();
+  const visible = new Set();
+  for (const n of nodes) {
+    const ok = matchesWs(n.p) && matchesSearch(n.p, q);
+    n.elm.classList.toggle("dim", !ok);
+    n.elm.classList.toggle("sel", n.id === current);
+    if (ok) visible.add(n.id);
+  }
+  const showReports = edgeMode === "all" || edgeMode === "reports";
+  const showWorks = edgeMode === "all" || edgeMode === "works";
+  for (const e of reportEdges) {
+    const off = !showReports || !visible.has(e.s.id) || !visible.has(e.t.id);
+    e.elm.classList.toggle("dim", off);
+    if (e.badge) e.badge.classList.toggle("dim", off);
+  }
+  for (const e of worksEdges) e.elm.classList.toggle("dim", !showWorks || !visible.has(e.s.id) || !visible.has(e.t.id));
+}
+
+// ════════════════════════════ Zoom / pan ════════════════════════════
+function applyTransform() { if (gRoot) gRoot.setAttribute("transform", `translate(${view.x},${view.y}) scale(${view.k})`); }
+function fitView() {
+  if (!nodes.length) return;
+  // In org fit-to-window mode the "fit" is owned by panToTopLeft (keep the
+  // readable zoom, center on the connected tree, scroll the free axis). Various
+  // actions (focus, edits) schedule a fitView; delegate so none of them clobber
+  // the fit framing with an all-nodes re-zoom.
+  if (isOrgLike() && fitWindow) { panToTopLeft(); return; }
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of nodes) { minX = Math.min(minX, n.x); maxX = Math.max(maxX, n.x); minY = Math.min(minY, n.y); maxY = Math.max(maxY, n.y); }
+  const pad = 90;
+  const bw = (maxX - minX) + pad * 2, bh = (maxY - minY) + pad * 2;
+  const k = Math.min(W / bw, H / bh, 1.1);
+  view.k = k;
+  view.x = W / 2 - ((minX + maxX) / 2) * k;
+  view.y = H / 2 - ((minY + maxY) / 2) * k;
+  applyTransform();
+  saveView();
+}
+// The nodes of the largest connected reporting component (by node count),
+// excluding the unconnected "reporting line unknown" orphans. Used to frame the
+// fit-to-window view on the main org tree rather than the centroid of every
+// disconnected piece.
+function largestComponentNodes() {
+  const connected = nodes.filter((n) => !n.orphan);
+  if (connected.length <= 1) return connected.length ? connected : nodes;
+  const inSet = new Set(connected.map((n) => n.id));
+  const root = (id) => { let c = id, g = 0; while (g++ < 999) { const p = byId.get(c) && byId.get(c).reportsTo; if (p && inSet.has(p)) c = p; else break; } return c; };
+  const comp = new Map(); // rootId -> nodes[]
+  for (const n of connected) { const r = root(n.id); (comp.get(r) || comp.set(r, []).get(r)).push(n); }
+  let best = null;
+  for (const arr of comp.values()) if (!best || arr.length > best.length) best = arr;
+  return best || connected;
+}
+// Pan (without changing zoom) for fit-to-window, which keeps the current zoom by
+// design. On BOTH axes the content is centered when it fits the window and
+// flushed to the start (so the overflow is scrollable) when it doesn't. Since
+// fit wraps the tree to the cross axis, the cross axis usually fits (→ centered)
+// while the free axis may overflow (→ flush + scroll).
+function panToTopLeft() {
+  if (!nodes.length) return;
+  // Frame the LARGEST connected reporting tree only. The roster has several
+  // disconnected pieces — the big CEO tree, a few small stray trees, and the
+  // "reporting line unknown" grid — all laid out along the cross axis. Framing
+  // their union centers on the centroid of everything, which shoves the main
+  // tree off-center (the bug). So pick the biggest component and center that;
+  // the smaller pieces stay reachable by scrolling the free axis.
+  const src = largestComponentNodes();
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const n of src) {
+    minX = Math.min(minX, n.x - (n.w || NW) / 2); maxX = Math.max(maxX, n.x + (n.w || NW) / 2);
+    minY = Math.min(minY, n.y - (n.h || NH) / 2); maxY = Math.max(maxY, n.y + (n.h || NH) / 2);
+  }
+  const pad = 30;
+  const lock = scrollLockAxis(); // "x" free-x / "y" free-y / null (not fit)
+  const cw = (maxX - minX) * view.k, ch = (maxY - minY) * view.k;
+  // Place the content along one axis: CENTER it when it fits the window, else
+  // flush it to the start (pad) so the overflow is reachable by scrolling.
+  const place = (extent, win, min) =>
+    (extent <= win - pad * 2) ? (win - extent) / 2 - min * view.k   // fits → center
+                              : pad - min * view.k;                  // overflows → flush start
+  if (lock === "x") {
+    view.x = place(cw, W, minX);   // free axis (x): center if it fits, else left
+    view.y = place(ch, H, minY);   // cross axis (y): center
+  } else if (lock === "y") {
+    view.y = place(ch, H, minY);   // free axis (y): center if it fits, else top
+    view.x = place(cw, W, minX);   // cross axis (x): center
+  } else {
+    view.x = place(cw, W, minX); view.y = place(ch, H, minY);
+  }
+  applyTransform();
+}
+function zoomBy(factor, cx, cy) {
+  cx = cx == null ? W / 2 : cx; cy = cy == null ? H / 2 : cy;
+  const k2 = Math.max(0.2, Math.min(3, view.k * factor));
+  view.x = cx - (cx - view.x) * (k2 / view.k);
+  view.y = cy - (cy - view.y) * (k2 / view.k);
+  view.k = k2; applyTransform();
+  saveView();
+}
+
+// The top-of-hierarchy node to anchor the default view on: the head (root) of
+// the largest connected component (e.g. the CEO). Falls back to the topmost or
+// leftmost node if no clear root exists.
+function topHierarchyNode() {
+  const comp = largestComponentNodes();
+  const inSet = new Set(comp.map((n) => n.id));
+  // A root has no manager inside the component.
+  const roots = comp.filter((n) => { const p = byId.get(n.id); return !(p && p.reportsTo && inSet.has(p.reportsTo)); });
+  if (roots.length) return roots.sort((a, b) => (a.y - b.y) || (a.x - b.x))[0];
+  return comp.slice().sort((a, b) => (a.y - b.y) || (a.x - b.x))[0] || nodes[0];
+}
+
+// Default framing: zoom so a standard card (NH = 40px) renders at 40px (k = 1),
+// and anchor the TOP of the hierarchy per mode:
+//   concentric  — center node dead center;
+//   vertical/network — root top-aligned, centered left↔right;
+//   horizontal  — root left-aligned, centered top↕bottom.
+function defaultView() {
+  if (!nodes.length) return;
+  view.k = 40 / NH; // a 40px-tall card → k = 1
+  const pad = 40;
+  if (isRadialLike()) {
+    // Concentric center sits at graph (0,0): put it at the canvas center.
+    view.x = W / 2; view.y = H / 2;
+  } else {
+    const top = topHierarchyNode();
+    if (!top) { view.x = W / 2; view.y = H / 2; applyTransform(); return; }
+    const hw = (top.w || NW) / 2, hh = (top.h || NH) / 2;
+    if (layoutMode === "org") {
+      // Horizontal: root flush-left, centered vertically.
+      view.x = pad - (top.x - hw) * view.k;
+      view.y = H / 2 - top.y * view.k;
+    } else {
+      // Vertical org / network: root top-aligned, centered horizontally.
+      view.x = W / 2 - top.x * view.k;
+      view.y = pad - (top.y - hh) * view.k;
+    }
+  }
+  applyTransform();
+}
+
+// ── Persist the last view (zoom + pan) per layout mode in localStorage ──
+const VIEW_KEY = "usaa-orgchart-view";
+let _saveViewTimer = null;
+function saveView() {
+  clearTimeout(_saveViewTimer);
+  _saveViewTimer = setTimeout(() => {
+    try {
+      const all = JSON.parse(localStorage.getItem(VIEW_KEY) || "{}");
+      all[layoutMode] = { k: view.k, x: view.x, y: view.y };
+      localStorage.setItem(VIEW_KEY, JSON.stringify(all));
+    } catch (e) {}
+  }, 200);
+}
+// Restore the saved view for the current mode. Returns true if one was applied.
+function restoreView() {
+  try {
+    const all = JSON.parse(localStorage.getItem(VIEW_KEY) || "{}");
+    const v = all[layoutMode];
+    if (v && Number.isFinite(v.k) && Number.isFinite(v.x) && Number.isFinite(v.y)) {
+      view.k = v.k; view.x = v.x; view.y = v.y; applyTransform();
+      _viewRestored = true;
+      return true;
+    }
+  } catch (e) {}
+  return false;
+}
+// Apply the saved view if present, otherwise the per-mode default.
+function applyInitialView() {
+  if (!restoreView()) defaultView();
+}
+
+// ════════════════════════════ Interaction ════════════════════════════
+// Convert a clientX/Y to graph-space coords (accounting for pan + zoom).
+function toGraph(clientX, clientY) {
+  const r = $("#graph").getBoundingClientRect();
+  return { x: (clientX - r.left - view.x) / view.k, y: (clientY - r.top - view.y) / view.k };
+}
+
+function bindNodeDrag(g, n) {
+  let moved = false, startX, startY;
+  g.addEventListener("pointerdown", (e) => {
+    if (linkDraw) return;           // link-draw mode handles its own pointer flow
+    if (e.target.closest(".ctl")) return; // a control button was clicked, not the card
+    e.stopPropagation();
+    g.setPointerCapture(e.pointerId);
+    moved = false; startX = e.clientX; startY = e.clientY;
+    n.fx = n.x; n.fy = n.y;
+    hideCardControls();
+    // Fixed layouts (org / concentric) don't drag (a click still opens).
+    const fixed = isOrgLike() || layoutMode === "concentric";
+    const move = (ev) => {
+      if (fixed) return;
+      if (Math.abs(ev.clientX - startX) + Math.abs(ev.clientY - startY) > 4) moved = true;
+      const g2 = toGraph(ev.clientX, ev.clientY);
+      n.fx = n.x = g2.x; n.fy = n.y = g2.y;
+      positionAll(); reheat(0.18);
+    };
+    const up = (ev) => {
+      g.removeEventListener("pointermove", move);
+      g.removeEventListener("pointerup", up);
+      if (!moved) { openRead(n.id); return; }
+      // Dropped: keep it pinned where left, and persist the whole arrangement
+      // once the neighbors it nudged settle.
+      n.dragPinned = true;
+      saveSoon();
+    };
+    g.addEventListener("pointermove", move);
+    g.addEventListener("pointerup", up);
+  });
+}
+
+function bindStagePan() {
+  const svg = $("#graph");
+  let panning = false, sx, sy, ox, oy;
+  svg.addEventListener("pointerdown", (e) => {
+    if (e.target.closest(".node-card")) return;
+    panning = true; svg.classList.add("panning");
+    sx = e.clientX; sy = e.clientY; ox = view.x; oy = view.y;
+    svg.setPointerCapture(e.pointerId);
+  });
+  svg.addEventListener("pointermove", (e) => {
+    if (!panning) return;
+    _userMovedView = true;
+    // In fit mode, lock dragging to the free (long) axis so the screenshot-ready
+    // view can't slip off-axis: horizontal scrolls x-only, vertical y-only.
+    const lock = scrollLockAxis();
+    if (lock !== "y") view.x = ox + (e.clientX - sx);
+    if (lock !== "x") view.y = oy + (e.clientY - sy);
+    applyTransform();
+  });
+  svg.addEventListener("pointerup", (e) => { if (panning) saveView(); panning = false; svg.classList.remove("panning"); });
+  svg.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    _userMovedView = true;
+    const r = svg.getBoundingClientRect();
+    // In fit mode the wheel SCROLLS along the free axis (keeping the zoom that
+    // makes "fit" meaningful) instead of zooming.
+    const lock = scrollLockAxis();
+    if (lock) {
+      const d = (Math.abs(e.deltaX) > Math.abs(e.deltaY) ? e.deltaX : e.deltaY);
+      if (lock === "x") view.x -= d; else view.y -= d;
+      applyTransform();
+      saveView();
+      return;
+    }
+    // Half the previous per-tick zoom factor for a gentler wheel zoom.
+    zoomBy(e.deltaY < 0 ? 1.06 : 0.943, e.clientX - r.left, e.clientY - r.top);
+  }, { passive: false });
+}
+
+// ════════════════════════════ Hover controls (SVG) ════════════════════════════
+// Small floating buttons drawn into gOverlay, in graph space, so they pan/zoom
+// with the chart. One set for the hovered card, one for the hovered edge.
+let hoverCardId = null, hoverEdge = null, hoverHideTimer = null;
+
+// Build a circular control button with a glyph (array of SVG child specs).
+function ctlButton(cx, cy, glyph, opts) {
+  opts = opts || {};
+  const g = el("g", { class: "ctl" + (opts.danger ? " danger" : "") + (opts.active ? " active" : ""), transform: `translate(${cx},${cy})` });
+  g.appendChild(el("circle", { r: 11 }));
+  const wrapAttrs = { class: "gly" + (opts.fillGlyph ? " gly-fill" : "") };
+  if (opts.rotate) wrapAttrs.transform = `rotate(${opts.rotate})`;
+  const wrap = el("g", wrapAttrs);
+  for (const spec of glyph) wrap.appendChild(el(spec[0], spec[1]));
+  g.appendChild(wrap);
+  if (opts.title) {
+    const t = el("title"); t.textContent = opts.title; g.appendChild(t);
+    // Visible hover label. Default: centered below the button. labelRight: to the
+    // right, vertically centered (used by the edge-pinned reports toggle).
+    const lbl = el("g", { class: "ctl-label" });
+    const tx = opts.labelRight ? 17 : 0, ty = opts.labelRight ? 4 : 24;
+    const anchor = opts.labelRight ? "start" : "middle";
+    const halo = el("text", { class: "halo", x: tx, y: ty, "text-anchor": anchor }); halo.textContent = opts.title;
+    const fg = el("text", { class: "fg", x: tx, y: ty, "text-anchor": anchor }); fg.textContent = opts.title;
+    lbl.appendChild(halo); lbl.appendChild(fg);
+    g._label = lbl; g._labelFor = opts.title; g.appendChild(lbl);
+  }
+  g.addEventListener("pointerdown", (e) => { e.stopPropagation(); });
+  g.addEventListener("click", (e) => { e.stopPropagation(); opts.onClick && opts.onClick(e); });
+  return g;
+}
+// Glyph path sets (drawn in a ~ -6..6 box)
+const GLY = {
+  plus:   [["line", { x1: 0, y1: -5, x2: 0, y2: 5 }], ["line", { x1: -5, y1: 0, x2: 5, y2: 0 }]],
+  x:      [["line", { x1: -4, y1: -4, x2: 4, y2: 4 }], ["line", { x1: 4, y1: -4, x2: -4, y2: 4 }]],
+  pencil: [["path", { d: "M -4 4 L -4 1 L 3 -6 L 6 -3 L -1 4 Z" }]],
+  // collapse = two arrows pointing inward toward center (↘ from top-left, ↖ from bottom-right)
+  collapse: [["line", { x1: -6, y1: -6, x2: -1.5, y2: -1.5 }], ["line", { x1: -1.5, y1: -1.5, x2: -5, y2: -1.5 }], ["line", { x1: -1.5, y1: -1.5, x2: -1.5, y2: -5 }],
+             ["line", { x1: 6, y1: 6, x2: 1.5, y2: 1.5 }], ["line", { x1: 1.5, y1: 1.5, x2: 5, y2: 1.5 }], ["line", { x1: 1.5, y1: 1.5, x2: 1.5, y2: 5 }]],
+  // expand = four arrows pointing outward to the corners
+  expand: [["line", { x1: -1.5, y1: -1.5, x2: -6, y2: -6 }], ["line", { x1: -6, y1: -6, x2: -2.5, y2: -6 }], ["line", { x1: -6, y1: -6, x2: -6, y2: -2.5 }],
+           ["line", { x1: 1.5, y1: -1.5, x2: 6, y2: -6 }], ["line", { x1: 6, y1: -6, x2: 2.5, y2: -6 }], ["line", { x1: 6, y1: -6, x2: 6, y2: -2.5 }],
+           ["line", { x1: -1.5, y1: 1.5, x2: -6, y2: 6 }], ["line", { x1: -6, y1: 6, x2: -2.5, y2: 6 }], ["line", { x1: -6, y1: 6, x2: -6, y2: 2.5 }],
+           ["line", { x1: 1.5, y1: 1.5, x2: 6, y2: 6 }], ["line", { x1: 6, y1: 6, x2: 2.5, y2: 6 }], ["line", { x1: 6, y1: 6, x2: 6, y2: 2.5 }]],
+  swap:   [["path", { d: "M -5 -2 A 4 4 0 0 1 4 -3" }], ["path", { d: "M 4 -5 l 0 2 l -2 0" }],
+           ["path", { d: "M 5 2 A 4 4 0 0 1 -4 3" }], ["path", { d: "M -4 5 l 0 -2 l 2 0" }]],
+  // reports = an org-tree glyph: one parent node (bottom) branching up to three
+  // child nodes. Drawn upright; rotated +90° in horizontal org mode so it points
+  // the way the chart flows (left→right). Nodes are small filled discs; the
+  // connectors are a center stem with two side branches.
+  reports: [["path", { d: "M 0 5 L 0 1 M -5 1 L 5 1 M -5 1 L -5 -2.5 M 5 1 L 5 -2.5 M 0 1 L 0 -2.5" }],
+            ["circle", { cx: 0, cy: 6.6, r: 1.9 }],
+            ["circle", { cx: -5, cy: -4.2, r: 1.9 }],
+            ["circle", { cx: 0, cy: -4.2, r: 1.9 }],
+            ["circle", { cx: 5, cy: -4.2, r: 1.9 }]],
+  // focus = crosshair: a ring with four tick marks reaching toward center
+  focus:  [["circle", { cx: 0, cy: 0, r: 4 }],
+           ["line", { x1: 0, y1: -4, x2: 0, y2: -7 }], ["line", { x1: 0, y1: 4, x2: 0, y2: 7 }],
+           ["line", { x1: -4, y1: 0, x2: -7, y2: 0 }], ["line", { x1: 4, y1: 0, x2: 7, y2: 0 }]],
+  // addPerson = a person silhouette (head + shoulders) with a small + badge at
+  // the lower-right. Drawn filled (ctlButton fillGlyph opt). The badge is a navy
+  // disc carved with a white plus so it reads against the silhouette.
+  addPerson: [["circle", { cx: -2, cy: -4, r: 3.6 }],
+              ["path", { d: "M -8 7 a 6 6 0 0 1 12 0 Z" }],
+              ["circle", { cx: 5, cy: 4, r: 4, style: "fill:var(--usaa-navy);stroke:#fff;stroke-width:1.2" }],
+              ["line", { x1: 5, y1: 1.8, x2: 5, y2: 6.2, style: "stroke:#fff;stroke-width:1.5" }],
+              ["line", { x1: 2.8, y1: 4, x2: 7.2, y2: 4, style: "stroke:#fff;stroke-width:1.5" }]]
+};
+
+// ── Card hover controls: +link, edit, expand/collapse, delete ──
+function bindCardHover(g, n) {
+  g.addEventListener("pointerenter", () => { if (linkDraw) return; clearTimeout(hoverHideTimer); showCardControls(n); });
+  g.addEventListener("pointerleave", () => { hoverHideTimer = setTimeout(hideCardControls, 220); });
+}
+function hasReports(id) { return people.some((p) => p.reportsTo === id); }
+function showCardControls(n) {
+  if (hoverEdge) hideEdgeControls();
+  // Idempotent: a pointerenter for the card we're already showing must NOT spawn
+  // a second control group (that orphans the first, which then never gets
+  // removed). Just keep the current controls alive.
+  if (hoverCardId === n.id && hoverCardCtls) { clearTimeout(hoverHideTimer); return; }
+  hideCardControls();
+  hoverCardId = n.id;
+  syncReportToggleVisibility(); // reveal this card's reports toggle while hovered
+  const grp = el("g", { class: "card-ctls", "data-for": n.id });
+  grp.addEventListener("pointerenter", () => clearTimeout(hoverHideTimer));
+  grp.addEventListener("pointerleave", () => { hoverHideTimer = setTimeout(hideCardControls, 220); });
+  // Invisible "bridge" that fills the gap between the card and its buttons, so
+  // moving the mouse straight down from the card keeps the controls alive
+  // instead of crossing dead space and triggering the hide timer.
+  const bridge = el("rect", { class: "ctl-bridge", fill: "transparent" });
+  grp.appendChild(bridge);
+  grp._bridge = bridge;
+  // four/optionally-six buttons centered below the card
+  const buttons = [];
+  buttons.push(ctlButton(0, 0, GLY.addPerson, { title: "Add a direct report", fillGlyph: true, onClick: () => addReport(n.id) }));
+  buttons.push(ctlButton(0, 0, GLY.plus, { title: "Link to an existing person", onClick: () => startLinkDraw(n) }));
+  buttons.push(ctlButton(0, 0, GLY.pencil, { title: "Edit", onClick: () => openEdit(n.id) }));
+  if (hasReports(n.id)) {
+    // Hide/show reports is handled in org modes by the persistent reports toggle
+    // pinned to the card's right edge; only offer the collapse button here in
+    // non-org (network) mode where that toggle isn't drawn.
+    if (!isOrgLike()) {
+      const isCol = collapsed.has(n.id);
+      buttons.push(ctlButton(0, 0, GLY.collapse, { title: isCol ? "Show reports" : "Hide reports", active: isCol, onClick: () => toggleCollapse(n.id) }));
+    }
+    const isFocused = focusId === n.id;
+    buttons.push(ctlButton(0, 0, GLY.focus, { title: isFocused ? "Exit focus" : "Focus chain of command", active: isFocused, onClick: () => toggleFocus(n.id) }));
+  }
+  buttons.push(ctlButton(0, 0, GLY.x, { danger: true, title: "Delete", onClick: () => doDelete(n.id) }));
+  const gap = 28, total = (buttons.length - 1) * gap;
+  buttons.forEach((b, i) => { b.setAttribute("data-dx", -total / 2 + i * gap); grp.appendChild(b); });
+  gOverlay.appendChild(grp);
+  hoverCardCtls = grp;
+  positionCardControls();
+}
+let hoverCardCtls = null;
+function positionCardControls() {
+  if (!hoverCardCtls || !hoverCardId) return;
+  const n = nodes.find((x) => x.id === hoverCardId);
+  if (!n) { hideCardControls(); return; }
+  const cy = n.y + NH / 2 + 20;
+  // Bridge: from the card's bottom edge to just past the buttons, spanning the
+  // button row's width — keeps hover continuous across the gap.
+  const bridge = hoverCardCtls._bridge;
+  if (bridge) {
+    const btnCount = hoverCardCtls.querySelectorAll(".ctl").length;
+    const bw = Math.max(NW, (btnCount - 1) * 28 + 24);
+    bridge.setAttribute("x", n.x - bw / 2);
+    bridge.setAttribute("y", n.y + NH / 2 - 2);
+    bridge.setAttribute("width", bw);
+    bridge.setAttribute("height", (cy + 14) - (n.y + NH / 2 - 2));
+  }
+  hoverCardCtls.querySelectorAll(".ctl").forEach((b) => {
+    const dx = Number(b.getAttribute("data-dx"));
+    b.setAttribute("transform", `translate(${n.x + dx},${cy})`);
+  });
+}
+function hideCardControls() {
+  // Remove the tracked group AND sweep up any that leaked, so a stale control
+  // set can never linger on the canvas.
+  if (gOverlay) gOverlay.querySelectorAll(".card-ctls").forEach((el) => el.remove());
+  hoverCardCtls = null; hoverCardId = null;
+  if (typeof syncReportToggleVisibility === "function") syncReportToggleVisibility();
+}
+function toggleCollapse(id) {
+  if (collapsed.has(id)) collapsed.delete(id); else collapsed.add(id);
+  hideCardControls();
+  rebuildGraphSoft();
+  flashCard(id);              // brief twice-pulse cue on the toggled card
+}
+
+// ── Edge hover controls: remove, cycle type ──
+function bindEdgeHover(e) {
+  const enter = () => { clearTimeout(hoverHideTimer); showEdgeControls(e); };
+  const leave = () => { hoverHideTimer = setTimeout(hideEdgeControls, 220); };
+  e.hit.addEventListener("pointerenter", enter);
+  e.hit.addEventListener("pointerleave", leave);
+}
+function showEdgeControls(e) {
+  if (hoverCardId) hideCardControls();
+  // Idempotent: re-entering the same edge (e.g. the pointer crossing onto the
+  // buttons that sit on top of it) must not spawn a duplicate, orphaned group.
+  if (hoverEdge === e && hoverEdgeCtls) { clearTimeout(hoverHideTimer); return; }
+  if (hoverEdge && hoverEdge !== e) hideEdgeControls();
+  hoverEdge = e;
+  e.elm.classList.add("hot");
+  const grp = el("g", { class: "edge-ctls" });
+  grp.addEventListener("pointerenter", () => clearTimeout(hoverHideTimer));
+  grp.addEventListener("pointerleave", () => { hoverHideTimer = setTimeout(hideEdgeControls, 220); });
+  // swap (cycle type) + remove
+  grp.appendChild(ctlButton(0, 0, GLY.swap, { title: "Toggle link type", cls: "swap", onClick: () => cycleEdgeType(e) }));
+  grp.appendChild(ctlButton(0, 0, GLY.x, { danger: true, title: "Remove link", onClick: () => removeEdge(e) }));
+  gOverlay.appendChild(grp);
+  hoverEdgeCtls = grp;
+  positionEdgeControls();
+}
+let hoverEdgeCtls = null;
+function positionEdgeControls() {
+  if (!hoverEdgeCtls || !hoverEdge) return;
+  const m = edgeMidpoint(hoverEdge.s, hoverEdge.t, !!hoverEdge.works);
+  const btns = hoverEdgeCtls.querySelectorAll(".ctl");
+  btns[0] && btns[0].setAttribute("transform", `translate(${m.x - 14},${m.y})`);
+  btns[1] && btns[1].setAttribute("transform", `translate(${m.x + 14},${m.y})`);
+}
+function hideEdgeControls() {
+  if (hoverEdge && hoverEdge.elm) hoverEdge.elm.classList.remove("hot");
+  // Clear any "hot" edge that leaked, and sweep up every edge-control group.
+  [...reportEdges, ...worksEdges].forEach((ed) => ed.elm && ed.elm.classList.remove("hot"));
+  if (gOverlay) gOverlay.querySelectorAll(".edge-ctls").forEach((el) => el.remove());
+  hoverEdgeCtls = null; hoverEdge = null;
+}
+
+// Cycle a link through: reports(confirmed) → reports(inferred) → works-with → …
+async function cycleEdgeType(e) {
+  hideEdgeControls();
+  const child = byId.get(e.dstId), parent = byId.get(e.srcId);
+  if (!child || !parent) return;
+  try {
+    if (!e.works && e.conf === "confirmed") {
+      await persistEdgeChange(child, { reportsTo: parent.id, reportingConfidence: "inferred", worksWith: child.worksWith });
+    } else if (!e.works && e.conf === "inferred") {
+      // becomes works-with: drop the reporting line, add a works-with pair
+      const ww = Array.from(new Set([...(child.worksWith || []), parent.id]));
+      await persistEdgeChange(child, { reportsTo: null, worksWith: ww });
+    } else {
+      // works-with → reports(confirmed): set child→parent reporting, drop the pair
+      if (wouldCycle(child.id, parent.id)) { toast("That would create a reporting loop", true); rebuildGraphSoft(); return; }
+      const ww = (child.worksWith || []).filter((w) => w !== parent.id);
+      await persistEdgeChange(child, { reportsTo: parent.id, reportingConfidence: "confirmed", worksWith: ww });
+    }
+    rebuildGraphSoft();
+  } catch (err) { toast(err.message, true); }
+}
+async function removeEdge(e) {
+  hideEdgeControls();
+  const child = byId.get(e.dstId), parent = byId.get(e.srcId);
+  if (!child) return;
+  try {
+    if (e.works) {
+      const ww = (child.worksWith || []).filter((w) => w !== e.srcId);
+      const ww2 = (parent.worksWith || []).filter((w) => w !== e.dstId);
+      await persistEdgeChange(child, { worksWith: ww });
+      if (parent && (parent.worksWith || []).includes(e.dstId)) await persistEdgeChange(parent, { worksWith: ww2 });
+    } else {
+      await persistEdgeChange(child, { reportsTo: null });
+    }
+    rebuildGraphSoft();
+  } catch (err) { toast(err.message, true); }
+}
+// Save a partial change to a person (merged onto their full record) and update local cache.
+async function persistEdgeChange(person, patch) {
+  const body = { ...person, ...patch };
+  const data = await api("PUT", "/api/stakeholders/" + encodeURIComponent(person.id), body);
+  upsert(data.stakeholder);
+}
+function wouldCycle(childId, newParentId) {
+  // walk up from newParent; if we reach child, it's a cycle
+  let cur = newParentId, guard = 0;
+  while (cur && guard++ < 999) {
+    if (cur === childId) return true;
+    cur = (byId.get(cur) || {}).reportsTo;
+  }
+  return false;
+}
+
+// ── Link draw: click + on a card, drag a handle onto a target card ──
+let linkDraw = null; // { from, lineEl, handleEl }
+function startLinkDraw(n) {
+  hideCardControls();
+  hideEdgeControls();
+  $("#graph").classList.add("linking"); // edge hit-paths go inert during the draw
+  linkDraw = { from: n, target: null };
+  const line = el("path", { class: "draft-link" });
+  const handle = el("circle", { class: "draft-handle", r: 8, fill: "#fff", stroke: "var(--usaa-navy)", "stroke-width": 2 });
+  gOverlay.appendChild(line); gOverlay.appendChild(handle);
+  linkDraw.lineEl = line; linkDraw.handleEl = handle;
+  // start the handle just below the source card
+  linkDraw.hx = n.x; linkDraw.hy = n.y + NH / 2 + 40;
+  drawDraftLink();
+  toast("Drag the handle onto a person to set their manager");
+
+  const svg = $("#graph");
+  const move = (ev) => {
+    const g2 = toGraph(ev.clientX, ev.clientY);
+    linkDraw.hx = g2.x; linkDraw.hy = g2.y;
+    // highlight a card under the pointer (excluding the source)
+    const el2 = document.elementFromPoint(ev.clientX, ev.clientY);
+    const card = el2 && el2.closest(".node-card");
+    const tid = card && card.getAttribute("data-id");
+    setDropTarget(tid && tid !== n.id ? tid : null);
+    drawDraftLink();
+  };
+  const up = async (ev) => {
+    svg.removeEventListener("pointermove", move);
+    window.removeEventListener("pointerup", up);
+    const target = linkDraw.target;
+    endLinkDraw();
+    if (target) await attachReportingLink(target, n.id);
+  };
+  svg.addEventListener("pointermove", move);
+  window.addEventListener("pointerup", up);
+}
+function setDropTarget(tid) {
+  if (linkDraw.target === tid) return;
+  if (linkDraw.target) { const prev = nodes.find((x) => x.id === linkDraw.target); if (prev && prev.elm) prev.elm.classList.remove("drop-ok"); }
+  linkDraw.target = tid;
+  if (tid) { const nn = nodes.find((x) => x.id === tid); if (nn && nn.elm) nn.elm.classList.add("drop-ok"); }
+}
+function drawDraftLink() {
+  if (!linkDraw) return;
+  const s = linkDraw.from;
+  const x1 = s.x, y1 = s.y + NH / 2, x2 = linkDraw.hx, y2 = linkDraw.hy, my = (y1 + y2) / 2;
+  linkDraw.lineEl.setAttribute("d", `M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}`);
+  linkDraw.handleEl.setAttribute("cx", x2); linkDraw.handleEl.setAttribute("cy", y2);
+}
+function endLinkDraw() {
+  if (!linkDraw) return;
+  // Clear ALL drop-ok highlights defensively (not just the tracked target).
+  if (gNodes) gNodes.querySelectorAll(".node-card.drop-ok").forEach((el) => el.classList.remove("drop-ok"));
+  linkDraw.lineEl.remove(); linkDraw.handleEl.remove();
+  linkDraw = null;
+  $("#graph").classList.remove("linking");
+}
+// The "+" starts a link FROM n as the manager; dropping on target makes target report to n.
+async function attachReportingLink(targetId, managerId) {
+  if (targetId === managerId) return;
+  const target = byId.get(targetId);
+  if (!target) return;
+  if (wouldCycle(managerId, targetId)) { toast("That would create a reporting loop", true); return; }
+  try {
+    await persistEdgeChange(target, { reportsTo: managerId, reportingConfidence: "confirmed" });
+    rebuildGraphSoft();
+    toast(`${target.name} now reports to ${byId.get(managerId).name}`);
+  } catch (err) { toast(err.message, true); }
+}
+
+// ════════════════════════════ Workstream filter menu ════════════════════════════
+function buildWsMenu() {
+  const menu = $("#ws-menu");
+  menu.innerHTML = "";
+  for (const w of workstreams) {
+    const item = document.createElement("label");
+    item.className = "ws-item";
+    item.innerHTML = `<input type="checkbox" value="${esc(w.id)}"><span class="sw" style="background:${WS_COLOR[w.id]||NO_WS}"></span>${esc(w.label)}`;
+    item.querySelector("input").addEventListener("change", (e) => {
+      if (e.target.checked) activeWs.add(w.id); else activeWs.delete(w.id);
+      updateWsSummary(); applyFilter();
+    });
+    menu.appendChild(item);
+  }
+  const actions = document.createElement("div");
+  actions.className = "ws-actions";
+  actions.innerHTML = `<a id="ws-all">Select all</a><a id="ws-none">Clear</a>`;
+  menu.appendChild(actions);
+  actions.querySelector("#ws-all").onclick = () => { activeWs = new Set(workstreams.map(w=>w.id)); syncWsChecks(); updateWsSummary(); applyFilter(); };
+  actions.querySelector("#ws-none").onclick = () => { activeWs.clear(); syncWsChecks(); updateWsSummary(); applyFilter(); };
+}
+function syncWsChecks() { $("#ws-menu").querySelectorAll('input[type=checkbox]').forEach(c => c.checked = activeWs.has(c.value)); }
+function updateWsSummary() {
+  const n = activeWs.size;
+  $("#ws-summary").textContent = n === 0 || n === workstreams.length ? "All" : (n + " selected");
+}
+
+// ════════════════════════════ Drawer: read ════════════════════════════
+function openRead(id) {
+  const p = byId.get(id); if (!p) return;
+  current = id;
+  applyFilter();
+  $("#drawer-name").textContent = p.name;
+  $("#drawer-sub").textContent = p.title || "";
+  const mgr = p.reportsTo ? byId.get(p.reportsTo) : null;
+  const directs = people.filter(x => x.reportsTo === id).sort((a,b)=>a.name.localeCompare(b.name));
+  const collaborators = (p.worksWith || []).map(w => byId.get(w)).filter(Boolean);
+  const alsoWorkWith = people.filter(x => (x.worksWith||[]).includes(id) && !(p.worksWith||[]).includes(x.id));
+
+  let h = "";
+  // Flags row
+  const flags = [];
+  if (p.affiliationUncertain) flags.push(`<span class="badge aff">Affiliation uncertain</span>`);
+  if (p.contractor) flags.push(`<span class="badge contractor">Contractor</span>`);
+  if (flags.length) h += `<div class="read-section" style="padding-bottom:8px">${flags.join(" ")}</div>`;
+
+  if (p.email || p.linkedin || p.sfid) {
+    h += `<div class="read-section"><h3>Contact</h3>`;
+    if (p.email) h += rrow("Email", `<a href="mailto:${esc(p.email)}">${esc(p.email)}</a>`);
+    if (p.linkedin) h += rrow("LinkedIn", `<a href="${esc(p.linkedin)}" target="_blank" rel="noopener">View profile &#8599;</a>`);
+    if (p.sfid) h += rrow("Salesforce", `<span style="font-family:ui-monospace,Menlo,monospace;font-size:12px">${esc(p.sfid)}</span>`);
+    h += `</div>`;
+  }
+
+  h += `<div class="read-section"><h3>Organization</h3>`;
+  if (p.dept) h += rrow("Team", esc(p.dept));
+  h += rrow("Category", `<span class="pill muted">${esc(CAT_LABEL[p.cat] || p.cat)}</span>`);
+  if (mgr) {
+    const badge = p.reportingConfidence === "confirmed" ? `<span class="badge confirmed">confirmed</span>` : `<span class="badge inferred">inferred</span>`;
+    h += rrow("Reports to", `<span class="link-pill" data-goto="${esc(mgr.id)}">${esc(mgr.name)} &rarr;</span> ${badge}`);
+  } else {
+    h += rrow("Reports to", `<span class="badge unknown">unknown</span>`);
+  }
+  if (directs.length) h += rrow(`Directs (${directs.length})`, `<div class="stacked">${directs.map(d=>`<span class="link-pill" data-goto="${esc(d.id)}">${esc(d.name)} &rarr;</span>`).join("")}</div>`);
+  h += `</div>`;
+
+  // Workstreams
+  if (p.workstreams && p.workstreams.length) {
+    const pills = p.workstreams.map(w => `<span class="pill" style="background:${WS_COLOR[w]||NO_WS}">${esc(wsLabel[w] || w)}</span>`).join("");
+    h += `<div class="read-section"><h3>Workstreams</h3>${pills}</div>`;
+  }
+
+  // Works with
+  if (collaborators.length || alsoWorkWith.length) {
+    const all = [...collaborators, ...alsoWorkWith];
+    h += `<div class="read-section"><h3>Works with</h3><div class="stacked">${all.map(c=>`<span class="link-pill" data-goto="${esc(c.id)}">${esc(c.name)} &rarr;</span>`).join("")}</div></div>`;
+  }
+
+  if (p.notes) h += `<div class="read-section"><h3>Notes &amp; context</h3><div class="notes-text">${esc(p.notes)}</div></div>`;
+
+  $("#drawer-body").innerHTML = h +
+    `<div class="drawer-actions"><button class="btn" id="edit-btn">Edit</button><span class="spacer"></span><button class="btn btn--danger" id="del-btn">Delete</button></div>`;
+  $("#edit-btn").onclick = () => openEdit(id);
+  $("#del-btn").onclick = () => doDelete(id);
+  $("#drawer-body").querySelectorAll("[data-goto]").forEach(e => e.onclick = () => { openRead(e.dataset.goto); focusNode(e.dataset.goto); });
+  showDrawer();
+}
+function rrow(k, v) { return `<div class="read-row"><span class="k">${k}</span><span class="v">${v}</span></div>`; }
+
+function focusNode(id) {
+  const n = nodes.find(x => x.id === id); if (!n) return;
+  view.k = Math.max(view.k, 0.9);
+  view.x = W * 0.32 - n.x * view.k; view.y = H / 2 - n.y * view.k;
+  applyTransform();
+}
+
+// ════════════════════════════ Drawer: edit / create ════════════════════════════
+let editWorks = []; // working copy of worksWith while editing
+
+function managerOptions(selfId, selectedId) {
+  const banned = new Set();
+  if (selfId) {
+    banned.add(selfId);
+    let changed = true;
+    while (changed) { changed = false; for (const p of people) if (p.reportsTo && banned.has(p.reportsTo) && !banned.has(p.id)) { banned.add(p.id); changed = true; } }
+  }
+  const opts = people.filter(p => !banned.has(p.id)).sort((a,b)=>a.name.localeCompare(b.name))
+    .map(p => `<option value="${esc(p.id)}"${p.id===selectedId?" selected":""}>${esc(p.name)}${p.title?" — "+esc(trim(p.title,30)):""}</option>`).join("");
+  return `<option value=""${!selectedId?" selected":""}>— No manager (top level / unknown) —</option>` + opts;
+}
+function formHtml(p) {
+  const v = (f) => esc(p[f] || "");
+  const catOpts = CATS.map(c => `<option value="${c.v}"${p.cat===c.v?" selected":""}>${c.label}</option>`).join("");
+  const wsBoxes = workstreams.map(w => `<label><input type="checkbox" class="f-ws" value="${esc(w.id)}"${(p.workstreams||[]).includes(w.id)?" checked":""}><span class="sw" style="background:${WS_COLOR[w.id]||NO_WS}"></span>${esc(w.label)}</label>`).join("");
+  const confSel = `<option value="inferred"${p.reportingConfidence!=="confirmed"?" selected":""}>Inferred</option><option value="confirmed"${p.reportingConfidence==="confirmed"?" selected":""}>Confirmed</option>`;
+  return `
+    <div class="field"><label for="f-name">Name *</label><input id="f-name" value="${v("name")}" autocomplete="off"></div>
+    <div class="field"><label for="f-title">Title / role</label><input id="f-title" value="${v("title")}" autocomplete="off"></div>
+    <div class="field"><label for="f-dept">Team / department</label><input id="f-dept" value="${v("dept")}" autocomplete="off"></div>
+    <div class="field"><label for="f-cat">Category</label><select id="f-cat">${catOpts}</select></div>
+    <div class="field"><label for="f-mgr">Reports to</label><select id="f-mgr">${managerOptions(p.id, p.reportsTo || "")}</select></div>
+    <div class="field"><label for="f-conf">Reporting line confidence</label><select id="f-conf">${confSel}</select><div class="hint">Confirmed draws a solid line; inferred draws a dashed line.</div></div>
+    <div class="field"><label>Workstreams</label><div class="ws-checks">${wsBoxes}</div></div>
+    <div class="field"><label>Works with</label><div class="works-picker" id="works-picker"></div>
+      <select id="works-add" style="margin-top:8px"><option value="">+ add a collaborator…</option></select></div>
+    <div class="field"><label for="f-email">Email</label><input id="f-email" type="email" value="${v("email")}" autocomplete="off"></div>
+    <div class="field"><label for="f-linkedin">LinkedIn URL</label><input id="f-linkedin" value="${v("linkedin")}" autocomplete="off"></div>
+    <div class="field"><label for="f-sfid">Salesforce ID</label><input id="f-sfid" value="${v("sfid")}" autocomplete="off"></div>
+    <div class="field"><label class="checkrow"><input type="checkbox" id="f-contractor"${p.contractor?" checked":""}> Contractor / consultant</label></div>
+    <div class="field"><label class="checkrow"><input type="checkbox" id="f-aff"${p.affiliationUncertain?" checked":""}> Affiliation uncertain (may not be USAA)</label></div>
+    <div class="field"><label for="f-notes">Notes &amp; context</label><textarea id="f-notes">${v("notes")}</textarea></div>
+  `;
+}
+function renderWorksPicker(selfId) {
+  const picker = $("#works-picker");
+  picker.innerHTML = editWorks.map(wid => {
+    const w = byId.get(wid); if (!w) return "";
+    return `<span class="works-chip">${esc(w.name)}<button data-rm="${esc(wid)}" title="Remove">&times;</button></span>`;
+  }).join("") || `<span style="color:var(--fg-3);font-size:12.5px">None yet</span>`;
+  picker.querySelectorAll("[data-rm]").forEach(b => b.onclick = () => { editWorks = editWorks.filter(x => x !== b.dataset.rm); renderWorksPicker(selfId); });
+  const add = $("#works-add");
+  add.innerHTML = `<option value="">+ add a collaborator…</option>` +
+    people.filter(p => p.id !== selfId && !editWorks.includes(p.id)).sort((a,b)=>a.name.localeCompare(b.name))
+      .map(p => `<option value="${esc(p.id)}">${esc(p.name)}</option>`).join("");
+  add.onchange = () => { if (add.value) { editWorks.push(add.value); renderWorksPicker(selfId); } };
+}
+function readForm(id) {
+  return {
+    name: $("#f-name").value.trim(), title: $("#f-title").value.trim(), dept: $("#f-dept").value.trim(),
+    cat: $("#f-cat").value, reportsTo: $("#f-mgr").value || null, reportingConfidence: $("#f-conf").value,
+    workstreams: [...document.querySelectorAll(".f-ws:checked")].map(c => c.value),
+    worksWith: editWorks.slice(),
+    email: $("#f-email").value.trim(), linkedin: $("#f-linkedin").value.trim(), sfid: $("#f-sfid").value.trim(),
+    contractor: $("#f-contractor").checked, affiliationUncertain: $("#f-aff").checked,
+    notes: $("#f-notes").value.trim()
+  };
+}
+function openEdit(id) {
+  const p = byId.get(id); if (!p) return;
+  current = id; editWorks = (p.worksWith || []).slice();
+  $("#drawer-name").textContent = "Edit"; $("#drawer-sub").textContent = p.name;
+  $("#drawer-body").innerHTML = formHtml(p) +
+    `<div class="drawer-actions"><button class="btn" id="save-btn">Save changes</button><button class="btn btn--ghost" id="cancel-btn">Cancel</button></div>`;
+  renderWorksPicker(id);
+  $("#save-btn").onclick = () => doSave(id);
+  $("#cancel-btn").onclick = () => openRead(id);
+  showDrawer(); $("#f-name").focus();
+}
+function openCreate() {
+  current = null; editWorks = [];
+  $("#drawer-name").textContent = "Add person"; $("#drawer-sub").textContent = "";
+  $("#drawer-body").innerHTML = formHtml({ cat: "unplaced", reportingConfidence: "inferred" }) +
+    `<div class="drawer-actions"><button class="btn" id="save-btn">Add to map</button><button class="btn btn--ghost" id="cancel-btn">Cancel</button></div>`;
+  renderWorksPicker(null);
+  $("#save-btn").onclick = doCreate;
+  $("#cancel-btn").onclick = closeDrawer;
+  showDrawer(); $("#f-name").focus();
+}
+
+// ════════════════════════════ Mutations ════════════════════════════
+async function doSave(id) {
+  const body = readForm(id);
+  if (!body.name) { toast("Name is required", true); return; }
+  try { const data = await api("PUT", "/api/stakeholders/" + encodeURIComponent(id), body); upsert(data.stakeholder); rebuildGraphSoft(); openRead(id); toast("Saved"); }
+  catch (e) { toast(e.message, true); }
+}
+async function doCreate() {
+  const body = readForm(null);
+  if (!body.name) { toast("Name is required", true); return; }
+  try { const data = await api("POST", "/api/stakeholders", body); upsert(data.stakeholder); rebuildGraphSoft(); openRead(data.stakeholder.id); toast("Added"); }
+  catch (e) { toast(e.message, true); }
+}
+
+// Add a new direct report under `managerId`, then make its name editable on the
+// card (Enter or blur saves; Escape on an unnamed new card removes it).
+const PLACEHOLDER_NAME = "New person";
+async function addReport(managerId) {
+  hideCardControls();
+  const mgr = byId.get(managerId);
+  if (!mgr) return;
+  try {
+    const data = await api("POST", "/api/stakeholders", {
+      name: PLACEHOLDER_NAME, reportsTo: managerId, reportingConfidence: "confirmed", cat: mgr.cat || "unplaced"
+    });
+    upsert(data.stakeholder);
+    // If the manager's subtree was collapsed, expand it so the new card shows.
+    if (collapsed.has(managerId)) collapsed.delete(managerId);
+    rebuildGraphSoft();
+    setTimeout(() => startNameEdit(data.stakeholder.id, true), 30);
+  } catch (e) { toast(e.message, true); }
+}
+
+// Inline name editor: overlay an HTML input (via foreignObject) on the card's
+// name, transforming with the card. `isNew` removes the card if left empty.
+let nameEditing = null;
+function startNameEdit(id, isNew) {
+  const n = nodes.find((x) => x.id === id);
+  if (!n || !n.elm) return;
+  if (nameEditing) nameEditing.commit();
+
+  const cw = cardW(), ch = cardH();
+  const fo = el("foreignObject", { x: -cw/2 + 8, y: -ch/2 + 7, width: cw - 16, height: 19, class: "name-edit-fo" });
+  const input = document.createElement("input");
+  input.type = "text";
+  input.className = "name-edit-input";
+  input.value = isNew ? "" : (byId.get(id)?.name || "");
+  input.placeholder = "Name…";
+  fo.appendChild(input);
+  n.elm.appendChild(fo);
+  // hide the static name (rect: .nm text; square: the whole .sqcard) while editing
+  const nmText = n.elm.querySelector(".nm") || n.elm.querySelector(".sqcard");
+  if (nmText) nmText.style.visibility = "hidden";
+
+  let done = false;
+  const cleanup = () => { fo.remove(); if (nmText) nmText.style.visibility = ""; nameEditing = null; };
+  const commit = async () => {
+    if (done) return; done = true;
+    const val = input.value.trim();
+    const p = byId.get(id);
+    if (!val) {
+      if (isNew) { // discard an unnamed brand-new card
+        try { await api("DELETE", "/api/stakeholders/" + encodeURIComponent(id)); } catch (e) {}
+        people = people.filter((x) => x.id !== id);
+        byId = new Map(people.map((q) => [q.id, q]));
+        cleanup(); rebuildGraphSoft();
+        return;
+      }
+      cleanup(); return; // existing card: leave name unchanged
+    }
+    cleanup();
+    if (p && val !== p.name) {
+      try { const data = await api("PUT", "/api/stakeholders/" + encodeURIComponent(id), { ...p, name: val }); upsert(data.stakeholder); rebuildGraphSoft(); }
+      catch (e) { toast(e.message, true); }
+    }
+  };
+  const cancel = async () => {
+    if (done) return; done = true;
+    if (isNew && !byId.get(id)?.name) { /* treat like empty */ }
+    cleanup();
+    if (isNew) { // brand-new + cancelled → remove it
+      try { await api("DELETE", "/api/stakeholders/" + encodeURIComponent(id)); } catch (e) {}
+      people = people.filter((x) => x.id !== id);
+      byId = new Map(people.map((q) => [q.id, q]));
+      rebuildGraphSoft();
+    }
+  };
+  input.addEventListener("keydown", (e) => {
+    e.stopPropagation();
+    if (e.key === "Enter") { e.preventDefault(); commit(); }
+    else if (e.key === "Escape") { e.preventDefault(); cancel(); }
+  });
+  input.addEventListener("blur", commit);
+  input.addEventListener("pointerdown", (e) => e.stopPropagation());
+  nameEditing = { commit, cancel };
+  input.focus();
+  input.select();
+}
+async function doDelete(id) {
+  const p = byId.get(id); if (!p) return;
+  const directs = people.filter(x => x.reportsTo === id).length;
+  if (!confirm(directs ? `Delete ${p.name}? Their ${directs} direct report(s) will have their reporting line cleared.` : `Delete ${p.name}?`)) return;
+  try {
+    await api("DELETE", "/api/stakeholders/" + encodeURIComponent(id));
+    people = people.filter(x => x.id !== id);
+    people.forEach(x => { if (x.reportsTo === id) x.reportsTo = null; if (x.worksWith) x.worksWith = x.worksWith.filter(w => w !== id); });
+    byId = new Map(people.map(p => [p.id, p]));
+    rebuildGraphSoft(); closeDrawer(); toast("Deleted");
+  } catch (e) { toast(e.message, true); }
+}
+function upsert(row) {
+  const i = people.findIndex(x => x.id === row.id);
+  if (i >= 0) people[i] = row; else people.push(row);
+  byId = new Map(people.map(p => [p.id, p]));
+  $("#count").textContent = people.length + " stakeholders";
+}
+// Rebuild edges/nodes in place but keep existing node positions for stability.
+function rebuildGraphSoft() {
+  // Fixed layouts (org / radial / concentric) recompute positions from scratch;
+  // there's no physics to keep warm and no prior positions worth preserving.
+  if (layoutMode !== "network") { initSim(); return; }
+  const prevPos = new Map(nodes.map(n => [n.id, { x: n.x, y: n.y, fx: n.fx, fy: n.fy }]));
+  initSim();
+  for (const n of nodes) {
+    const prev = prevPos.get(n.id);
+    if (prev) { n.x = prev.x; n.y = prev.y; n.fx = prev.fx; n.fy = prev.fy; }
+  }
+  positionAll(); reheat(0.4);
+}
+
+// Fire a brief two-pulse gold flash on a card — the attention cue used right
+// after its reports-visibility or focus is toggled. Because a toggle rebuilds
+// the node DOM, this is called after the rebuild and re-finds the element.
+function flashCard(id) {
+  const n = nodes.find((x) => x.id === id);
+  if (!n || !n.elm) return;
+  n.elm.classList.remove("glow-flash");
+  void n.elm.getBoundingClientRect(); // reflow so re-adding restarts the animation
+  n.elm.classList.add("glow-flash");
+  n.elm.addEventListener("animationend", () => n.elm && n.elm.classList.remove("glow-flash"), { once: true });
+}
+
+// ════════════════════════════ Drawer plumbing ════════════════════════════
+function showDrawer() { $("#drawer").classList.add("open"); $("#drawer").setAttribute("aria-hidden","false"); $("#overlay").classList.add("open"); }
+function closeDrawer() { $("#drawer").classList.remove("open"); $("#drawer").setAttribute("aria-hidden","true"); $("#overlay").classList.remove("open"); current = null; applyFilter(); }
+let toastTimer;
+function toast(msg, isErr) { const t = $("#toast"); t.textContent = msg; t.classList.toggle("err", !!isErr); t.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 2600); }
+
+// ════════════════════════════ Wire up ════════════════════════════
+$("#add-btn").onclick = openCreate;
+$("#drawer-close").onclick = closeDrawer;
+$("#overlay").onclick = closeDrawer;
+$("#search").addEventListener("input", applyFilter);
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeDrawer(); });
+$("#ws-toggle").onclick = (e) => { e.stopPropagation(); $("#ws-menu").classList.toggle("open"); };
+document.addEventListener("click", (e) => { if (!e.target.closest(".ws-filter")) $("#ws-menu").classList.remove("open"); });
+$("#edge-seg").querySelectorAll("button").forEach(b => b.onclick = () => {
+  $("#edge-seg").querySelectorAll("button").forEach(x => x.classList.remove("active"));
+  b.classList.add("active"); edgeMode = b.dataset.edges; applyFilter();
+});
+$("#zoom-in").onclick = () => zoomBy(1.2);
+$("#zoom-out").onclick = () => zoomBy(0.83);
+$("#zoom-fit").onclick = fitView;
+$("#auto-layout").onclick = autoLayout;
+let _resizeTimer = null;
+window.addEventListener("resize", () => {
+  const r = $("#graph").getBoundingClientRect(); W = r.width; H = r.height;
+  // Fit-to-window is sized to the window, so re-wrap (debounced) as it changes.
+  if (isOrgLike() && fitWindow) {
+    clearTimeout(_resizeTimer);
+    _resizeTimer = setTimeout(() => { initSim(); }, 120);
+  }
+});
+
+// The fit toggle shows only in the org modes, and its label names the axis it
+// fixes: horizontal mode fits the window HEIGHT (chart grows rightward), vertical
+// fits the WIDTH (chart grows downward).
+function syncFitToggle() {
+  $("#fit-toggle-wrap").classList.toggle("show", isOrgLike());
+  $("#fit-label").textContent = isOrgVertical() ? "Fit to width" : "Fit to height";
+}
+// When fit is on, movement is locked to the free (long) axis: horizontal mode
+// scrolls left↔right only, vertical scrolls up↕down only. null = pan freely.
+function scrollLockAxis() {
+  if (!(isOrgLike() && fitWindow)) return null;
+  return isOrgVertical() ? "y" : "x";   // the axis the content extends along
+}
+
+// Layout-mode slider: network map ↔ fixed org chart.
+// Layout-mode segmented control: network · org · radial.
+$("#mode-seg").querySelectorAll(".mode-btn").forEach((btn) => {
+  btn.onclick = () => {
+    if (layoutMode === btn.dataset.mode) return;
+    layoutMode = btn.dataset.mode;
+    $("#mode-seg").querySelectorAll(".mode-btn").forEach((b) => b.classList.toggle("active", b === btn));
+    // Auto-layout (re-tidy + physics) only applies to the network map.
+    $("#auto-layout").style.display = layoutMode === "network" ? "" : "none";
+    syncFitToggle();
+    hideCardControls();
+    initSim();
+    setTimeout(applyInitialView, layoutMode === "network" ? 700 : 90);
+  };
+});
+// Fit-to-window: wrap the org chart so every box fits the window. We snap to a
+// readable zoom (so "fits the window" is meaningful — at a tiny zoom everything
+// already fits and nothing would wrap), then wrap rows/columns to that budget.
+$("#fit-window").addEventListener("change", (e) => {
+  fitWindow = e.target.checked;
+  hideCardControls();
+  if (fitWindow) view.k = 1;   // readable, screenshot-friendly zoom
+  initSim();
+  if (!fitWindow) setTimeout(fitView, 60); // unchecking: re-fit the unconstrained layout
+});
+
+// Auto-layout: forget all saved positions, re-seed from the tidy tree, and let
+// the physics relax around it. Persists the fresh arrangement when it settles.
+async function autoLayout() {
+  try { await api("POST", "/api/stakeholders/reset-positions"); } catch (e) {}
+  for (const p of people) { p.posX = null; p.posY = null; }
+  initSim();          // re-seeds tidy (no saved positions now) and reheats
+  setTimeout(fitView, 700);
+  toast("Re-tidied the layout");
+}
+
+bindStagePan();
+// Auto-layout only applies to the network map; hidden in the default org mode.
+$("#auto-layout").style.display = layoutMode === "network" ? "" : "none";
+syncFitToggle(); // org is the default mode
+load().catch(err => { $("#loading").textContent = "Could not load stakeholders: " + err.message; });
+</script>
+</body>
+</html>

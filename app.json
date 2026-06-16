@@ -1,0 +1,40 @@
+{
+  "name": "Org Chart Microsite",
+  "description": "A password-protected, interactive, editable stakeholder org chart. Drag to reposition, add/edit people in the browser, switch between horizontal, vertical, concentric, and network layouts.",
+  "keywords": ["org-chart", "stakeholder-map", "express", "postgres"],
+  "website": "https://github.com/REPLACE_ME/orgchart-microsite",
+  "repository": "https://github.com/REPLACE_ME/orgchart-microsite",
+  "logo": "https://node-js-sample.herokuapp.com/node.png",
+  "success_url": "/org-chart",
+  "addons": [
+    { "plan": "heroku-postgresql:essential-0" }
+  ],
+  "buildpacks": [
+    { "url": "heroku/nodejs" }
+  ],
+  "env": {
+    "SITE_PASSWORD": {
+      "description": "Password visitors must enter to view the site. Pick something memorable to share with your team.",
+      "value": "change-me"
+    },
+    "SESSION_SECRET": {
+      "description": "Secret used to sign login sessions. A random value is fine; leave as-is to auto-generate.",
+      "generator": "secret"
+    },
+    "SITE_TITLE": {
+      "description": "Title shown in the header and browser tab.",
+      "value": "Stakeholder Map",
+      "required": false
+    },
+    "SITE_SUBTITLE": {
+      "description": "Subtitle shown under the title (optional).",
+      "value": "",
+      "required": false
+    },
+    "SITE_LOCKUP": {
+      "description": "URL of a logo image to show in the header (optional). Leave blank for none.",
+      "value": "",
+      "required": false
+    }
+  }
+}
