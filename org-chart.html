@@ -1482,8 +1482,10 @@ function drawStatic() {
     const segW = w / segs.length;
     const ACCENT_H = 4, ACCENT_GROWN = 8, NAME_BAND_H = 18;
     const accentTop = -h / 2;                       // bottom edge of the bar (fixed)
-    // Name band (above the grown bar), built once and retargeted on segment hover.
-    const bandTop = accentTop - ACCENT_GROWN - NAME_BAND_H;
+    // When grown, the bar's TOP edge rises by (ACCENT_GROWN - ACCENT_H). The name
+    // band sits flush ABOVE that edge — no gap — so its bottom == the grown top.
+    const grownTop = accentTop - (ACCENT_GROWN - ACCENT_H);
+    const bandTop = grownTop - NAME_BAND_H;
     const band = el("g", { class: "ws-name" });
     const bandRect = el("rect", { x: -w/2, y: bandTop, width: w, height: NAME_BAND_H });
     const bandText = el("text", { x: -w/2 + 7, y: bandTop + NAME_BAND_H/2 });
