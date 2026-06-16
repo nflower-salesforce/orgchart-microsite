@@ -1469,7 +1469,11 @@ function drawStatic() {
     const w = n.w = square ? SQ : NW;
     const h = n.h = cardH(n.p);
     const g = el("g", { class: "node-card" + (square ? " square" : "") + (wraps && !square ? " org" : ""), "data-id": n.id });
-    const bg = el("rect", { class: "bg", x: -w/2, y: -h/2 + 4, width: w, height: h - 4 });
+    // Inset by half the 1px stroke so the (centered) stroke paints INSIDE the
+    // card's [-w/2, w/2] box, flush with the accent edges — otherwise the outer
+    // half-pixel pokes past the left edge and shows as an extra sliver when the
+    // hover state turns the border bright.
+    const bg = el("rect", { class: "bg", x: -w/2 + 0.5, y: -h/2 + 4 + 0.5, width: w - 1, height: h - 4 - 1 });
     g.appendChild(bg);
     // Accent: split the top bar into equal segments, one per workstream. The bar
     // sits at the card's top edge (default 4px). On card hover it grows UPWARD to
