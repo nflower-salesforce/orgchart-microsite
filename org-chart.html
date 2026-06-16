@@ -1483,7 +1483,11 @@ function drawStatic() {
     // transforms are unreliable across engines).
     const ws = (n.p.workstreams || []);
     const segs = ws.length ? ws : [null];
-    const segW = w / segs.length;
+    // The bar spans the SAME inset box as the card border (left -w/2+0.5, right
+    // w/2-0.5) so its edges align exactly with the card's left/right borders —
+    // no overhang on either side.
+    const accLeft = -w/2 + 0.5, accRight = w/2 - 0.5, accW = accRight - accLeft;
+    const segW = accW / segs.length;
     const ACCENT_H = 4, ACCENT_GROWN = 8, NAME_BAND_H = 18;
     const accentTop = -h / 2;                       // bottom edge of the bar (fixed)
     // When grown, the bar's TOP edge rises by (ACCENT_GROWN - ACCENT_H). The name
@@ -1491,16 +1495,19 @@ function drawStatic() {
     const grownTop = accentTop - (ACCENT_GROWN - ACCENT_H);
     const bandTop = grownTop - NAME_BAND_H;
     const band = el("g", { class: "ws-name" });
-    const bandRect = el("rect", { x: -w/2, y: bandTop, width: w, height: NAME_BAND_H });
-    const bandText = el("text", { x: -w/2 + 7, y: bandTop + NAME_BAND_H/2 });
+    const bandRect = el("rect", { x: accLeft, y: bandTop, width: accW, height: NAME_BAND_H });
+    const bandText = el("text", { x: accLeft + 7, y: bandTop + NAME_BAND_H/2 });
     band.appendChild(bandRect); band.appendChild(bandText);
     // Build the colored segments + invisible hit-rects (taller, so the thin bar
     // is easy to target). Card-hover grows every segment upward.
     const accentRects = [];
     segs.forEach((wk, i) => {
       const fill = wk ? (WS_COLOR[wk] || NO_WS) : NO_WS;
-      const x = -w/2 + i * segW;
-      const seg = el("rect", { class: "accent", x, y: accentTop, width: segW + 0.5, height: ACCENT_H, fill });
+      const x = accLeft + i * segW;
+      // Overlap into the next segment by 0.5px to avoid sub-pixel seams, but the
+      // LAST segment ends exactly at the bar's right edge (flush with the border).
+      const segRight = (i === segs.length - 1) ? accRight : (x + segW + 0.5);
+      const seg = el("rect", { class: "accent", x, y: accentTop, width: segRight - x, height: ACCENT_H, fill });
       accentRects.push(seg);
       g.appendChild(seg);
       if (wk) {
