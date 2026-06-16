@@ -189,11 +189,10 @@
 
   .node-card { cursor: pointer; }
   .node-card .bg { fill: #fff; stroke: var(--border-1); stroke-width: 1; rx: 4; }
-  .node-card .accent { rx: 2; height: 4px; transition: height .1s ease; }
-  /* Hover anywhere on the card → thicken the workstream accent bar to 2× height
-     so the per-workstream colors are easy to read at a glance. */
-  .node-card:hover .accent { height: 8px; }
-  /* Per-segment hover reveals a full-width name band (built in JS), flush below
+  /* Accent bar height/position is JS-driven (grows upward on card hover); the
+     transition just smooths it. */
+  .node-card .accent { rx: 2; transition: height .1s ease, y .1s ease; }
+  /* Per-segment hover reveals a full-width name band (built in JS), flush ABOVE
      the accent. Hidden until its segment is hovered. */
   .node-card .ws-name { opacity: 0; pointer-events: none; }
   .node-card .ws-name.show { opacity: 1; }
@@ -1472,33 +1471,55 @@ function drawStatic() {
     const g = el("g", { class: "node-card" + (square ? " square" : "") + (wraps && !square ? " org" : ""), "data-id": n.id });
     const bg = el("rect", { class: "bg", x: -w/2, y: -h/2 + 4, width: w, height: h - 4 });
     g.appendChild(bg);
-    // Accent: split the top bar into equal segments, one per workstream.
+    // Accent: split the top bar into equal segments, one per workstream. The bar
+    // sits at the card's top edge (default 4px). On card hover it grows UPWARD to
+    // 8px (top edge rises, bottom edge stays put). Hovering a colored segment
+    // drops a full-width name band flush ABOVE the bar — a direct upward
+    // extension of that segment. Growth + band are JS-driven (SVG-rect CSS
+    // transforms are unreliable across engines).
     const ws = (n.p.workstreams || []);
     const segs = ws.length ? ws : [null];
     const segW = w / segs.length;
-    // Full-width name band shown when a colored segment is hovered: same color as
-    // the segment, flush below the (doubled, 8px) accent bar, one title-height
-    // line of contrasting text. Built once per card, retargeted on segment hover.
-    const NAME_BAND_H = 18;
+    const ACCENT_H = 4, ACCENT_GROWN = 8, NAME_BAND_H = 18;
+    const accentTop = -h / 2;                       // bottom edge of the bar (fixed)
+    // Name band (above the grown bar), built once and retargeted on segment hover.
+    const bandTop = accentTop - ACCENT_GROWN - NAME_BAND_H;
     const band = el("g", { class: "ws-name" });
-    const bandRect = el("rect", { x: -w/2, y: -h/2 + 8, width: w, height: NAME_BAND_H });
-    const bandText = el("text", { x: -w/2 + 7, y: -h/2 + 8 + NAME_BAND_H/2 });
+    const bandRect = el("rect", { x: -w/2, y: bandTop, width: w, height: NAME_BAND_H });
+    const bandText = el("text", { x: -w/2 + 7, y: bandTop + NAME_BAND_H/2 });
     band.appendChild(bandRect); band.appendChild(bandText);
+    // Build the colored segments + invisible hit-rects (taller, so the thin bar
+    // is easy to target). Card-hover grows every segment upward.
+    const accentRects = [];
     segs.forEach((wk, i) => {
       const fill = wk ? (WS_COLOR[wk] || NO_WS) : NO_WS;
-      const seg = el("rect", { class: "accent", x: -w/2 + i * segW, y: -h/2, width: segW + 0.5, height: 4, fill });
+      const x = -w/2 + i * segW;
+      const seg = el("rect", { class: "accent", x, y: accentTop, width: segW + 0.5, height: ACCENT_H, fill });
+      accentRects.push(seg);
+      g.appendChild(seg);
       if (wk) {
-        // Hovering this segment fills the name band with its workstream name.
-        seg.addEventListener("pointerenter", () => {
+        // Transparent hit area covering the segment + a little below, so hover is
+        // reliable even at the default 4px height.
+        const hit = el("rect", { x, y: accentTop - ACCENT_GROWN, width: segW + 0.5, height: ACCENT_GROWN + 14, fill: "transparent" });
+        hit.addEventListener("pointerenter", () => {
           bandRect.setAttribute("fill", fill);
           bandText.setAttribute("fill", textOn(fill));
           bandText.textContent = wsLabel[wk] || wk;
           band.classList.add("show");
         });
-        seg.addEventListener("pointerleave", () => band.classList.remove("show"));
+        hit.addEventListener("pointerleave", () => band.classList.remove("show"));
+        g.appendChild(hit);
       }
-      g.appendChild(seg);
     });
+    // Grow/shrink the bar upward on card hover.
+    const growAccents = (grown) => {
+      for (const seg of accentRects) {
+        seg.setAttribute("height", grown ? ACCENT_GROWN : ACCENT_H);
+        seg.setAttribute("y", grown ? accentTop - (ACCENT_GROWN - ACCENT_H) : accentTop);
+      }
+    };
+    g.addEventListener("pointerenter", () => growAccents(true));
+    g.addEventListener("pointerleave", () => growAccents(false));
     if (wraps) {
       // Wrapped name + title via an HTML foreignObject sized to the card. Square
       // (concentric) cards center their text; org cards are left-aligned.
