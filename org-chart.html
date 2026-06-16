@@ -1469,11 +1469,7 @@ function drawStatic() {
     const w = n.w = square ? SQ : NW;
     const h = n.h = cardH(n.p);
     const g = el("g", { class: "node-card" + (square ? " square" : "") + (wraps && !square ? " org" : ""), "data-id": n.id });
-    // Inset by half the 1px stroke so the (centered) stroke paints INSIDE the
-    // card's [-w/2, w/2] box, flush with the accent edges — otherwise the outer
-    // half-pixel pokes past the left edge and shows as an extra sliver when the
-    // hover state turns the border bright.
-    const bg = el("rect", { class: "bg", x: -w/2 + 0.5, y: -h/2 + 4 + 0.5, width: w - 1, height: h - 4 - 1 });
+    const bg = el("rect", { class: "bg", x: -w/2, y: -h/2 + 4, width: w, height: h - 4 });
     g.appendChild(bg);
     // Accent: split the top bar into equal segments, one per workstream. The bar
     // sits at the card's top edge (default 4px). On card hover it grows UPWARD to
@@ -1483,10 +1479,9 @@ function drawStatic() {
     // transforms are unreliable across engines).
     const ws = (n.p.workstreams || []);
     const segs = ws.length ? ws : [null];
-    // The bar spans the SAME inset box as the card border (left -w/2+0.5, right
-    // w/2-0.5) so its edges align exactly with the card's left/right borders —
-    // no overhang on either side.
-    const accLeft = -w/2 + 0.5, accRight = w/2 - 0.5, accW = accRight - accLeft;
+    // The bar spans the SAME full box as the card border (-w/2 .. w/2) so its
+    // edges coincide exactly with the card's left/right borders.
+    const accLeft = -w/2, accRight = w/2, accW = w;
     const segW = accW / segs.length;
     const ACCENT_H = 4, ACCENT_GROWN = 8, NAME_BAND_H = 18;
     const accentTop = -h / 2;                       // bottom edge of the bar (fixed)
