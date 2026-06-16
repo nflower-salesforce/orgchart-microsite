@@ -189,7 +189,15 @@
 
   .node-card { cursor: pointer; }
   .node-card .bg { fill: #fff; stroke: var(--border-1); stroke-width: 1; rx: 4; }
-  .node-card .accent { rx: 2; }
+  .node-card .accent { rx: 2; height: 4px; transition: height .1s ease; }
+  /* Hover anywhere on the card → thicken the workstream accent bar to 2× height
+     so the per-workstream colors are easy to read at a glance. */
+  .node-card:hover .accent { height: 8px; }
+  /* Per-segment hover reveals a full-width name band (built in JS), flush below
+     the accent. Hidden until its segment is hovered. */
+  .node-card .ws-name { opacity: 0; pointer-events: none; }
+  .node-card .ws-name.show { opacity: 1; }
+  .node-card .ws-name text { font-family: var(--font-body); font-size: 10.5px; dominant-baseline: central; }
   .node-card:hover .bg { stroke: var(--sf-electric-50); }
   .node-card.sel .bg { stroke: var(--sf-electric-50); stroke-width: 2; }
   .node-card.dim { opacity: .22; }
@@ -419,6 +427,16 @@ const WS_COLOR = {
 };
 const NO_WS = "#9aa7b4";
 const colorFor = (p) => (p.workstreams && p.workstreams.length ? (WS_COLOR[p.workstreams[0]] || NO_WS) : NO_WS);
+// Pick black or white text for legibility over a given hex background (WCAG-ish
+// relative-luminance threshold).
+function textOn(hex) {
+  const m = /^#?([0-9a-f]{6})$/i.exec(hex || "");
+  if (!m) return "#fff";
+  const n = parseInt(m[1], 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return lum > 0.6 ? "#1a1a1a" : "#fff";
+}
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;");
@@ -1458,8 +1476,27 @@ function drawStatic() {
     const ws = (n.p.workstreams || []);
     const segs = ws.length ? ws : [null];
     const segW = w / segs.length;
+    // Full-width name band shown when a colored segment is hovered: same color as
+    // the segment, flush below the (doubled, 8px) accent bar, one title-height
+    // line of contrasting text. Built once per card, retargeted on segment hover.
+    const NAME_BAND_H = 18;
+    const band = el("g", { class: "ws-name" });
+    const bandRect = el("rect", { x: -w/2, y: -h/2 + 8, width: w, height: NAME_BAND_H });
+    const bandText = el("text", { x: -w/2 + 7, y: -h/2 + 8 + NAME_BAND_H/2 });
+    band.appendChild(bandRect); band.appendChild(bandText);
     segs.forEach((wk, i) => {
-      const seg = el("rect", { class: "accent", x: -w/2 + i * segW, y: -h/2, width: segW + 0.5, height: 4, fill: wk ? (WS_COLOR[wk] || NO_WS) : NO_WS });
+      const fill = wk ? (WS_COLOR[wk] || NO_WS) : NO_WS;
+      const seg = el("rect", { class: "accent", x: -w/2 + i * segW, y: -h/2, width: segW + 0.5, height: 4, fill });
+      if (wk) {
+        // Hovering this segment fills the name band with its workstream name.
+        seg.addEventListener("pointerenter", () => {
+          bandRect.setAttribute("fill", fill);
+          bandText.setAttribute("fill", textOn(fill));
+          bandText.textContent = wsLabel[wk] || wk;
+          band.classList.add("show");
+        });
+        seg.addEventListener("pointerleave", () => band.classList.remove("show"));
+      }
       g.appendChild(seg);
     });
     if (wraps) {
@@ -1481,6 +1518,7 @@ function drawStatic() {
       const aff = el("text", { class: "aff", x: w/2 - 14, y: -h/2 + 19, "font-size": "12", "font-weight": "700" });
       aff.textContent = "?"; g.appendChild(aff);
     }
+    g.appendChild(band); // last → the name band overlays the card's name/title
     n.elm = g; gNodes.appendChild(g);
     bindNodeDrag(g, n);
     bindCardHover(g, n);
