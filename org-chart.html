@@ -1493,7 +1493,10 @@ function drawStatic() {
     const grownTop = accentTop - (ACCENT_GROWN - ACCENT_H);
     const bandTop = grownTop - NAME_BAND_H;
     const band = el("g", { class: "ws-name" });
-    const bandRect = el("rect", { x: accLeft, y: bandTop, width: accW, height: NAME_BAND_H });
+    // Extend the band 1px DOWN into the accent so the two adjacent rects share a
+    // pixel row — kills the faint anti-aliasing seam between band and bar. Band
+    // color matches the hovered segment, so the overlap is invisible.
+    const bandRect = el("rect", { x: accLeft, y: bandTop, width: accW, height: NAME_BAND_H + 1 });
     const bandText = el("text", { x: accLeft + 7, y: bandTop + NAME_BAND_H/2 });
     band.appendChild(bandRect); band.appendChild(bandText);
     // Build the colored segments + invisible hit-rects (taller, so the thin bar
