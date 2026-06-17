@@ -2172,18 +2172,19 @@ function hideEdgeControls() {
   hoverEdgeCtls = null; hoverEdge = null;
 }
 
-// Cycle a link through: reports(confirmed) → reports(inferred) → works-with → …
+// Toggle a link's confidence. For a reporting line this flips ONLY between
+// inferred ↔ confirmed — it never drops the line (which would orphan the
+// person into "unknown"). A works-with line has no confidence, so the swap
+// promotes it into a (confirmed) reporting line.
 async function cycleEdgeType(e) {
   hideEdgeControls();
   const child = byId.get(e.dstId), parent = byId.get(e.srcId);
   if (!child || !parent) return;
   try {
-    if (!e.works && e.conf === "confirmed") {
-      await persistEdgeChange(child, { reportsTo: parent.id, reportingConfidence: "inferred", worksWith: child.worksWith });
-    } else if (!e.works && e.conf === "inferred") {
-      // becomes works-with: drop the reporting line, add a works-with pair
-      const ww = Array.from(new Set([...(child.worksWith || []), parent.id]));
-      await persistEdgeChange(child, { reportsTo: null, worksWith: ww });
+    if (!e.works) {
+      // reporting line: just flip the confidence, keep the line intact.
+      const next = e.conf === "confirmed" ? "inferred" : "confirmed";
+      await persistEdgeChange(child, { reportsTo: parent.id, reportingConfidence: next, worksWith: child.worksWith });
     } else {
       // works-with → reports(confirmed): set child→parent reporting, drop the pair
       if (wouldCycle(child.id, parent.id)) { toast("That would create a reporting loop", true); rebuildGraphSoft(); return; }
