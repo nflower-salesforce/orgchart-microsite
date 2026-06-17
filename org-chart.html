@@ -191,7 +191,10 @@
   .node-card .bg { fill: #fff; stroke: var(--border-1); stroke-width: 1; rx: 0; }
   /* Accent bar height/position is JS-driven (grows upward on card hover); the
      transition just smooths it. */
-  .node-card .accent { rx: 0; transition: height .1s ease, y .1s ease; }
+  .node-card .accent { rx: 0; transition: height .1s ease, y .1s ease, opacity .1s ease; }
+  /* When one segment is hovered (multi-segment cards only), its siblings dim to
+     boost the contrast of the focused workstream. */
+  .node-card .accent.dim { opacity: 0.28; }
   /* Per-segment hover reveals a full-width name band (built in JS), flush ABOVE
      the accent. Hidden until its segment is hovered. */
   .node-card .ws-name { opacity: 0; pointer-events: none; }
@@ -1514,8 +1517,13 @@ function drawStatic() {
           bandText.setAttribute("fill", textOn(fill));
           bandText.textContent = wsLabel[wk] || wk;
           band.classList.add("show");
+          // Dim the OTHER segments to spotlight the hovered one (multi-seg only).
+          if (segs.length > 1) accentRects.forEach((s, j) => s.classList.toggle("dim", j !== i));
         });
-        hit.addEventListener("pointerleave", () => band.classList.remove("show"));
+        hit.addEventListener("pointerleave", () => {
+          band.classList.remove("show");
+          accentRects.forEach(s => s.classList.remove("dim"));
+        });
         g.appendChild(hit);
       }
     });
