@@ -9,12 +9,12 @@ network layouts. Data persists in Postgres.
 
 ## 1. Deploy it (no command line needed)
 
-> **Before you click:** create a free GitHub account if you don't have one, then
-> **fork this repo** (top-right "Fork") so the button can deploy *your* copy.
-> Edit the `repository` URL in `app.json` to point at your fork, or just use the
-> button below after replacing `REPLACE_ME`.
+> Just click the button — it deploys *your own* copy onto *your* Heroku account
+> (the database, password, and data are all yours). You only need to **fork this
+> repo** first if you want to change the code; to customize the roster, you can
+> do it in the browser or via `seed-data.js` after deploying.
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/REPLACE_ME/orgchart-microsite)
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/nflower-salesforce/orgchart-microsite)
 
 Clicking the button opens a Heroku form. Fill in:
 

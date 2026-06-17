@@ -2,8 +2,8 @@
   "name": "Org Chart Microsite",
   "description": "A password-protected, interactive, editable stakeholder org chart. Drag to reposition, add/edit people in the browser, switch between horizontal, vertical, concentric, and network layouts.",
   "keywords": ["org-chart", "stakeholder-map", "express", "postgres"],
-  "website": "https://github.com/REPLACE_ME/orgchart-microsite",
-  "repository": "https://github.com/REPLACE_ME/orgchart-microsite",
+  "website": "https://github.com/nflower-salesforce/orgchart-microsite",
+  "repository": "https://github.com/nflower-salesforce/orgchart-microsite",
   "logo": "https://node-js-sample.herokuapp.com/node.png",
   "success_url": "/org-chart",
   "addons": [
